@@ -1,0 +1,29 @@
+= New Relic F5 Plugin
+
+== Instructions for running the F5 plugin agent
+
+Note: prior to general release, the platform gems will not be available on rubygems.org.  To
+install the platform gems, you need to download the project from the git repositories and do
+"rake build" followed by "gem install pkg/gemname.gem"
+
+The git repositories are all found at http://github.com/newrelic-platform
+
+1. Install the +newrelic_plugin+ gem.
+2. Install this gem.
+3. Create an installation directory.
+4. In the installation directory, execute
+
+      f5_monitor install -l LICENSE_KEY
+
+   using the license key from your New Relic account.
+5. Edit the +config/newrelic_plugin.yml+ file generated in step 4.  Setup name/hostname/port/snmp_community for each F5 you wish to monitor.
+6. Execute
+
+      f5_monitor run
+
+== Developer Instructions
+
+1. Fork/Clone the repository
+2. Install bundler and do +bundle install+
+3. Do <b><tt>rake -T</tt></b> to see rake options, including tests.
+
