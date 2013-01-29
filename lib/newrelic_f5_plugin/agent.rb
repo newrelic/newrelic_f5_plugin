@@ -20,10 +20,10 @@ module NewRelic::F5Plugin
 
 
   class Agent < NewRelic::Plugin::Agent::Base
-    agent_guid    '3e768a422cae01fe59cc15d255933ec896b32792'
-    agent_version '0.0.1'
+    agent_guid    '9edfe90795d241fa8c118f761b9789c05aa1295b'
+    agent_version '0.0.2'
     agent_config_options :hostname, :port, :snmp_community
-    agent_human_labels('F5 LTM') { "#{hostname}" }
+    agent_human_labels('F5') { "#{hostname}" }
 
     def setup_metrics
       # We have to define our custom OIDs of SNMP complains
@@ -37,9 +37,10 @@ module NewRelic::F5Plugin
       @oid_sysServersslStatCurConns = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.10.2.0")
 
       # These OIDs need rates applied to them
-      #@oid_sysTcpStatAccepts     = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.6.0")
+      @oid_sysTcpStatAccepts     = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.6.0")
       @oid_sysStatClientTotConns = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.1.7.0")
       @oid_sysStatServerTotConns = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.1.14.0")
+      @sysTcpStatAccepts         = NewRelic::Processor::EpochCounter.new
       @sysStatClientTotConns     = NewRelic::Processor::EpochCounter.new
       @sysStatServerTotConns     = NewRelic::Processor::EpochCounter.new
 
@@ -57,6 +58,16 @@ module NewRelic::F5Plugin
       # HTTP Requests
       @oid_sysStatHttpRequests = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.1.56.0")
       @sysStatHttpRequests     = NewRelic::Processor::EpochCounter.new
+
+      # CPU Info
+      @oid_sysGlobalHostCpuUser1m       = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.22.0")
+      @oid_sysGlobalHostCpuNice1m       = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.23.0")
+      @oid_sysGlobalHostCpuSystem1m     = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.24.0")
+      @oid_sysGlobalHostCpuIdle1m       = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.25.0")
+      @oid_sysGlobalHostCpuIrq1m        = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.26.0")
+      @oid_sysGlobalHostCpuSoftirq1m    = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.27.0")
+      @oid_sysGlobalHostCpuIowait1m     = SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.28.0")
+
     end
 
     def poll_cycle
@@ -75,29 +86,43 @@ module NewRelic::F5Plugin
                               @oid_sysStatServerBytesIn,
                               @oid_sysStatServerBytesOut,
                               @oid_sysStatHttpRequests,
+                              @oid_sysTcpStatAccepts,
+                              @oid_sysGlobalHostCpuUser1m,
+                              @oid_sysGlobalHostCpuNice1m,
+                              @oid_sysGlobalHostCpuSystem1m,
+                              @oid_sysGlobalHostCpuIdle1m,
+                              @oid_sysGlobalHostCpuIrq1m,
+                              @oid_sysGlobalHostCpuSoftirq1m,
+                              @oid_sysGlobalHostCpuIowait1m,
                              ])
 
         # This is ugly, but the SNMP module isn't very friendly (or at least the docs aren't)
-        report_metric "Memory/TMM",                 "bytes",    res[0]
-        report_metric "Memory/Host",                "bytes",    res[1]
-        report_metric "Connections/Current/Client", "conn",     res[2]
-        report_metric "Connections/Current/Server", "conn",     res[3]
-        report_metric "Connections/Current/Client SSL",     "conn",     res[6]
-        report_metric "Connections/CurrentServer SSL",     "conn",     res[7]
-        report_metric "Connections/Rate/Client",    "conn/sec", @sysStatClientTotConns.process(res[4])
-        report_metric "Connections/Rate/Server",    "conn/sec", @sysStatServerTotConns.process(res[5])
-
-        # These need to be multiplied by 8 to get Bits (They are in Bytes)
-        report_metric "Throughput/Client/In",  "bytes/sec", @sysStatClientBytesIn.process(res[8])
-        report_metric "Throughput/Client/Out", "bytes/sec", @sysStatClientBytesOut.process(res[9])
-        report_metric "Throughput/Server/In",  "bytes/sec", @sysStatServerBytesIn.process(res[10])
-        report_metric "Throughput/Server/Out", "bytes/sec", @sysStatServerBytesOut.process(res[11])
-
-        report_metric "HTTP/Global/Requests", "req/sec", @sysStatHttpRequests.process(res[12])
+        report_metric "Memory/TMM",                     "bytes",     res[0]
+        report_metric "Memory/Host",                    "bytes",     res[1]
+        report_metric "Connections/Current/Client",     "conn",      res[2]
+        report_metric "Connections/Current/Server",     "conn",      res[3]
+        report_metric "Connections/Current/Client SSL", "conn",      res[6]
+        report_metric "Connections/CurrentServer SSL",  "conn",      res[7]
+        report_metric "Connections/Rate/Client",        "conn/sec",  @sysStatClientTotConns.process(res[4])
+        report_metric "Connections/Rate/Server",        "conn/sec",  @sysStatServerTotConns.process(res[5])
+        report_metric "Throughput/Client/In",           "bytes/sec", @sysStatClientBytesIn.process(res[8])
+        report_metric "Throughput/Client/Out",          "bytes/sec", @sysStatClientBytesOut.process(res[9])
+        report_metric "Throughput/Server/In",           "bytes/sec", @sysStatServerBytesIn.process(res[10])
+        report_metric "Throughput/Server/Out",          "bytes/sec", @sysStatServerBytesOut.process(res[11])
+        report_metric "HTTP/Global/Requests",           "req/sec",   @sysStatHttpRequests.process(res[12])
+        report_metric "TCP/Accepts",                    "conn/sec",  @sysTcpStatAccepts.process(res[13])
+        report_metric "CPU/Global/User",                "%",         res[14]
+        report_metric "CPU/Global/Nice",                "%",         res[15]
+        report_metric "CPU/Global/System",              "%",         res[16]
+        report_metric "CPU/Global/Idle",                "%",         res[17]
+        report_metric "CPU/Global/IRQ",                 "%",         res[18]
+        report_metric "CPU/Global/Soft IRQ",            "%",         res[19]
+        report_metric "CPU/Global/IO Wait",             "%",         res[20]
       end
     rescue => e
       $stderr.puts "#{e}: #{e.backtrace.join("\n  ")}"
     end
+
   end
 
 end
