@@ -1,3 +1,8 @@
+* 0.0.3
+  - Added more HTTP metrics
+  - Added default port so you don't have to specify it in the yaml
+  - Refactored much of the agent implementation to make if more modular
+
 * 0.0.2
   - Added Global CPU Metrics
 
