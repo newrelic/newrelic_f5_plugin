@@ -21,14 +21,14 @@ newrelic:
   # Set to '1' for verbose output, remove for normal output.
   # All output goes to stdout/stderr.
   #
-  verbose: 1
+  #verbose: 1
 
 
 #
 # Agent Configuration:
 #
 agents:
-  f5_ltm:
+  f5:
     # Define one or more instances
     -
       name:           'My F5'
