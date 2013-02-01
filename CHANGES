@@ -1,3 +1,7 @@
+* 0.0.4
+  - Added SSL metric collection
+  - Changed CPU to be a percentage of 100 by asking how many CPUs the device has
+
 * 0.0.3
   - Added more HTTP metrics
   - Added default port so you don't have to specify it in the yaml

@@ -18,7 +18,14 @@ module NewRelic::F5Plugin
   end
 
 
-
+  # Part of me wants to split this out into different devices using this OID:
+  #   1.3.6.1.4.1.3375.2.1.3.5.2.0 = STRING: "BIG-IP 3900" or
+  #   1.3.6.1.4.1.3375.2.1.3.5.1.0 = STRING: "C106"
+  # Especially since a 3900, 6900, Viprion won't respond exactly the same.
+  # To make it worse, versions of BIG-IP older than 11.2 might not implent all
+  # all of these OIDs.
+  #   Version: 1.3.6.1.4.1.3375.2.1.4.2.0
+  #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    '9edfe90795d241fa8c118f761b9789c05aa1295b'
     agent_version '0.0.2'
