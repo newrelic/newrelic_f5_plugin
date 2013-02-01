@@ -103,15 +103,14 @@ module NewRelic::F5Plugin
                               @oid_sysGlobalHostCpuIowait1m, @oid_sysGlobalHostCpuCount])
 
         # In order to show the CPU usage as a total percentage, we divide by the number of cpus
-        # Also, F5 reports this as the actual percent, so divide by 100 to get a decimal
         cpu_count = res[7].to_i
-        report_metric "CPU/Global/User",     "%", res[0].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/Nice",     "%", res[1].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/System",   "%", res[2].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/Idle",     "%", res[3].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/IRQ",      "%", res[4].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/Soft IRQ", "%", res[5].to_f / (cpu_count * 100)
-        report_metric "CPU/Global/IO Wait",  "%", res[6].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/User",     "%", res[0].to_f / cpu_count
+        report_metric "CPU/Global/Nice",     "%", res[1].to_f / cpu_count
+        report_metric "CPU/Global/System",   "%", res[2].to_f / cpu_count
+        report_metric "CPU/Global/Idle",     "%", res[3].to_f / cpu_count
+        report_metric "CPU/Global/IRQ",      "%", res[4].to_f / cpu_count
+        report_metric "CPU/Global/Soft IRQ", "%", res[5].to_f / cpu_count
+        report_metric "CPU/Global/IO Wait",  "%", res[6].to_f / cpu_count
       end
     end
 
