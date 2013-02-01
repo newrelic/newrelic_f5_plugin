@@ -88,18 +88,23 @@ module NewRelic::F5Plugin
       @oid_sysGlobalHostCpuIrq1m     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.26.0")
       @oid_sysGlobalHostCpuSoftirq1m ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.27.0")
       @oid_sysGlobalHostCpuIowait1m  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.28.0")
+      @oid_sysGlobalHostCpuCount     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.4.0")
 
       if snmp
         res = snmp.get_value([@oid_sysGlobalHostCpuUser1m, @oid_sysGlobalHostCpuNice1m, @oid_sysGlobalHostCpuSystem1m,
                               @oid_sysGlobalHostCpuIdle1m, @oid_sysGlobalHostCpuIrq1m, @oid_sysGlobalHostCpuSoftirq1m,
-                              @oid_sysGlobalHostCpuIowait1m])
-        report_metric "CPU/Global/User",     "%", res[0]
-        report_metric "CPU/Global/Nice",     "%", res[1]
-        report_metric "CPU/Global/System",   "%", res[2]
-        report_metric "CPU/Global/Idle",     "%", res[3]
-        report_metric "CPU/Global/IRQ",      "%", res[4]
-        report_metric "CPU/Global/Soft IRQ", "%", res[5]
-        report_metric "CPU/Global/IO Wait",  "%", res[6]
+                              @oid_sysGlobalHostCpuIowait1m, @oid_sysGlobalHostCpuCount])
+
+        # In order to show the CPU usage as a total percentage, we divide by the number of cpus
+        # Also, F5 reports this as the actual percent, so divide by 100 to get a decimal
+        cpu_count = res[7].to_i
+        report_metric "CPU/Global/User",     "%", res[0].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/Nice",     "%", res[1].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/System",   "%", res[2].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/Idle",     "%", res[3].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/IRQ",      "%", res[4].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/Soft IRQ", "%", res[5].to_f / (cpu_count * 100)
+        report_metric "CPU/Global/IO Wait",  "%", res[6].to_f / (cpu_count * 100)
       end
     end
 
