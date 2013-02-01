@@ -45,6 +45,7 @@ module NewRelic::F5Plugin
       report_global_connection_metrics(snmp)
       report_global_throughput_metrics(snmp)
       report_global_http_metrics(snmp)
+      report_global_ssl_metrics(snmp)
       report_global_tcp_metrics(snmp)
 
       snmp.close
@@ -219,6 +220,26 @@ module NewRelic::F5Plugin
         report_counter_metric "HTTP/Response Size/4k Bucket",  "resp/sec", res[14]
         report_counter_metric "HTTP/Response Size/16k Bucket", "resp/sec", res[15]
         report_counter_metric "HTTP/Response Size/32k Bucket", "resp/sec", res[16]
+      end
+    end
+
+
+    #
+    # SSL Stats
+    #
+    def report_global_ssl_metrics(snmp)
+      @oid_sysClientsslStatTotNativeConns ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.9.6.0")
+      @oid_sysClientsslStatTotCompatConns ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.9.9.0")
+      @oid_sysServersslStatTotNativeConns ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.10.6.0")
+      @oid_sysServersslStatTotCompatConns ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.10.9.0")
+
+      if snmp
+        res = snmp.get_value([@oid_sysClientsslStatTotNativeConns, @oid_sysClientsslStatTotCompatConns, @oid_sysServersslStatTotNativeConns,
+                              @oid_sysServersslStatTotCompatConns])
+        report_counter_metric "SSL/Global/Client/Native", "trans/sec", res[0]
+        report_counter_metric "SSL/Global/Client/Compat", "trans/sec", res[1]
+        report_counter_metric "SSL/Global/Server/Native", "trans/sec", res[2]
+        report_counter_metric "SSL/Global/Server/Compat", "trans/sec", res[3]
       end
     end
 
