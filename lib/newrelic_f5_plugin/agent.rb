@@ -38,10 +38,10 @@ module NewRelic::F5Plugin
     #
     def poll_cycle
       # SNMP Stuff here
-      snmp = SNMP::Manager.open(:host => hostname, :port => port, :community => snmp_community)
+      snmp = SNMP::Manager.new(:host => hostname, :port => port, :community => snmp_community)
 
-      report_cpu_metics(snmp)
-      report_memory_metrics(snmp)
+      report_global_cpu_metrics(snmp)
+      report_global_memory_metrics(snmp)
       report_global_connection_metrics(snmp)
       report_global_throughput_metrics(snmp)
       report_global_http_metrics(snmp)
@@ -78,7 +78,7 @@ module NewRelic::F5Plugin
     #
     # Gather CPU Related metrics and report them
     #
-    def report_cpu_metrics(snmp)
+    def report_global_cpu_metrics(snmp)
       # Create the OIDs if they do not exist
       @oid_sysGlobalHostCpuUser1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.22.0")
       @oid_sysGlobalHostCpuNice1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.23.0")
@@ -106,7 +106,7 @@ module NewRelic::F5Plugin
     #
     # Gather Memory related metrics and report them
     #
-    def report_memory_metrics(snmp)
+    def report_global_memory_metrics(snmp)
       # Create the OIDs if they don't exist
       @oid_sysStatMemoryUsed ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.1.45.0")
       @oid_sysHostMemoryUsed ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.7.1.2.0")
