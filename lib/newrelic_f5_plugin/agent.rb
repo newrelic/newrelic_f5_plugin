@@ -28,7 +28,7 @@ module NewRelic::F5Plugin
   #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    '9edfe90795d241fa8c118f761b9789c05aa1295b'
-    agent_version '0.0.2'
+    agent_version '0.0.5'
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 
@@ -173,10 +173,10 @@ module NewRelic::F5Plugin
         res = snmp.get_value([@oid_sysStatClientBytesIn, @oid_sysStatClientBytesOut, @oid_sysStatServerBytesIn,
                               @oid_sysStatServerBytesOut])
 
-        report_counter_metric "Throughput/Client/In",  "bytes/sec", res[0]
-        report_counter_metric "Throughput/Client/Out", "bytes/sec", res[1]
-        report_counter_metric "Throughput/Server/In",  "bytes/sec", res[2]
-        report_counter_metric "Throughput/Server/Out", "bytes/sec", res[3]
+        report_counter_metric "Throughput/Client/In",  "bits/sec", (res[0].to_f * 8)
+        report_counter_metric "Throughput/Client/Out", "bits/sec", (res[1].to_f * 8)
+        report_counter_metric "Throughput/Server/In",  "bits/sec", (res[2].to_f * 8)
+        report_counter_metric "Throughput/Server/Out", "bits/sec", (res[3].to_f * 8)
       end
     end
 

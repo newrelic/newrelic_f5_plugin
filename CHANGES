@@ -1,3 +1,6 @@
+* 0.0.5
+  - Changed bytes to bits on throughput metrics
+
 * 0.0.4
   - Added SSL metric collection
   - Changed CPU to be a percentage of 100 by asking how many CPUs the device has
