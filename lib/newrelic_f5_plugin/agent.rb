@@ -27,8 +27,8 @@ module NewRelic::F5Plugin
   #   Version: 1.3.6.1.4.1.3375.2.1.4.2.0
   #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
-    agent_guid    '9edfe90795d241fa8c118f761b9789c05aa1295b'
-    agent_version '0.0.5'
+    agent_guid    'com.newrelic.f5'
+    agent_version '0.0.6'
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 
@@ -91,26 +91,29 @@ module NewRelic::F5Plugin
       @oid_sysGlobalHostCpuUser1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.22.0")
       @oid_sysGlobalHostCpuNice1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.23.0")
       @oid_sysGlobalHostCpuSystem1m  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.24.0")
-      @oid_sysGlobalHostCpuIdle1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.25.0")
+      #@oid_sysGlobalHostCpuIdle1m    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.25.0") # Ignoring the idle time
       @oid_sysGlobalHostCpuIrq1m     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.26.0")
       @oid_sysGlobalHostCpuSoftirq1m ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.27.0")
       @oid_sysGlobalHostCpuIowait1m  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.28.0")
       @oid_sysGlobalHostCpuCount     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.20.4.0")
 
       if snmp
-        res = snmp.get_value([@oid_sysGlobalHostCpuUser1m, @oid_sysGlobalHostCpuNice1m, @oid_sysGlobalHostCpuSystem1m,
-                              @oid_sysGlobalHostCpuIdle1m, @oid_sysGlobalHostCpuIrq1m, @oid_sysGlobalHostCpuSoftirq1m,
-                              @oid_sysGlobalHostCpuIowait1m, @oid_sysGlobalHostCpuCount])
+        res = snmp.get_value([@oid_sysGlobalHostCpuCount, @oid_sysGlobalHostCpuUser1m, @oid_sysGlobalHostCpuNice1m,
+                              @oid_sysGlobalHostCpuSystem1m, @oid_sysGlobalHostCpuIrq1m, @oid_sysGlobalHostCpuSoftirq1m,
+                              @oid_sysGlobalHostCpuIowait1m, ])
 
         # In order to show the CPU usage as a total percentage, we divide by the number of cpus
-        cpu_count = res[7].to_i
-        report_metric "CPU/Global/User",     "%", res[0].to_f / cpu_count
-        report_metric "CPU/Global/Nice",     "%", res[1].to_f / cpu_count
-        report_metric "CPU/Global/System",   "%", res[2].to_f / cpu_count
-        #report_metric "CPU/Global/Idle",     "%", res[3].to_f / cpu_count
-        report_metric "CPU/Global/IRQ",      "%", res[4].to_f / cpu_count
-        report_metric "CPU/Global/Soft IRQ", "%", res[5].to_f / cpu_count
-        report_metric "CPU/Global/IO Wait",  "%", res[6].to_f / cpu_count
+        cpu_count = res[0].to_i
+        vals = res[1..6].map { |i| i.to_f / cpu_count }
+        report_metric "CPU/Global/User",     "%", vals[0]
+        report_metric "CPU/Global/Nice",     "%", vals[1]
+        report_metric "CPU/Global/System",   "%", vals[2]
+        report_metric "CPU/Global/IRQ",      "%", vals[3]
+        report_metric "CPU/Global/Soft IRQ", "%", vals[4]
+        report_metric "CPU/Global/IO Wait",  "%", vals[5]
+
+        # Add it all up, and send a summary metric
+        report_metric "CPU/Total/Global", "%", vals.inject(0.0){ |a,b| a + b }
       end
     end
 
@@ -265,19 +268,19 @@ module NewRelic::F5Plugin
       @oid_sysTcpStatFinWait   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.4.0")  # "The number of current connections in FIN-WAIT/CLOSING."
       @oid_sysTcpStatTimeWait  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.5.0")  # "The number of current connections in TIME-WAIT."
       @oid_sysTcpStatAccepts   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.6.0")  # "The number of connections accepted."
-      # sysTcpStatAcceptfails  1.3.6.1.4.1.3375.2.1.1.2.12.7.0   "The number of connections not accepted."
-      # sysTcpStatConnects     1.3.6.1.4.1.3375.2.1.1.2.12.8.0   "The number of connections established."
-      # sysTcpStatConnfails    1.3.6.1.4.1.3375.2.1.1.2.12.9.0   "The number of connection failures."
-      # sysTcpStatExpires      1.3.6.1.4.1.3375.2.1.1.2.12.10.0  "The number of connections expired due to idle timeout."
-      # sysTcpStatAbandons     1.3.6.1.4.1.3375.2.1.1.2.12.11.0  "The number of connections abandoned connections due to retries/keep-alives."
-      # sysTcpStatRxrst        1.3.6.1.4.1.3375.2.1.1.2.12.12.0  "The number of received RST."
-      # sysTcpStatRxbadsum     1.3.6.1.4.1.3375.2.1.1.2.12.13.0  "The number of bad checksum."
-      # sysTcpStatRxbadseg     1.3.6.1.4.1.3375.2.1.1.2.12.14.0  "The number of malformed segments."
-      # sysTcpStatRxooseg      1.3.6.1.4.1.3375.2.1.1.2.12.15.0  "The number of out of order segments."
-      # sysTcpStatRxcookie     1.3.6.1.4.1.3375.2.1.1.2.12.16.0  "The number of received SYN-cookies."
-      # sysTcpStatRxbadcookie  1.3.6.1.4.1.3375.2.1.1.2.12.17.0  "The number of bad SYN-cookies."
-      # sysTcpStatSyncacheover 1.3.6.1.4.1.3375.2.1.1.2.12.18.0  "The number of SYN-cache overflow."
-      # sysTcpStatTxrexmits    1.3.6.1.4.1.3375.2.1.1.2.12.19.0  "The number of retransmitted segments."
+      # @oid_sysTcpStatAcceptfails  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.7.0")   # "The number of connections not accepted."
+      # @oid_sysTcpStatConnects     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.8.0")   # "The number of connections established."
+      # @oid_sysTcpStatConnfails    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.9.0")   # "The number of connection failures."
+      # @oid_sysTcpStatExpires      ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.10.0")  # "The number of connections expired due to idle timeout."
+      # @oid_sysTcpStatAbandons     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.11.0")  # "The number of connections abandoned connections due to retries/keep-alives."
+      # @oid_sysTcpStatRxrst        ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.12.0")  # "The number of received RST."
+      # @oid_sysTcpStatRxbadsum     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.13.0")  # "The number of bad checksum."
+      # @oid_sysTcpStatRxbadseg     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.14.0")  # "The number of malformed segments."
+      # @oid_sysTcpStatRxooseg      ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.15.0")  # "The number of out of order segments."
+      # @oid_sysTcpStatRxcookie     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.16.0")  # "The number of received SYN-cookies."
+      # @oid_sysTcpStatRxbadcookie  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.17.0")  # "The number of bad SYN-cookies."
+      # @oid_sysTcpStatSyncacheover ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.18.0")  # "The number of SYN-cache overflow."
+      # @oid_sysTcpStatTxrexmits    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.12.19.0")  # "The number of retransmitted segments."
       if snmp
         res = snmp.get_value([@oid_sysTcpStatOpen, @oid_sysTcpStatCloseWait, @oid_sysTcpStatFinWait,
                               @oid_sysTcpStatTimeWait, @oid_sysTcpStatAccepts, ])
