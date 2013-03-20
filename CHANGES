@@ -2,6 +2,7 @@
   - Change the GUID to match the standard naming scheme
   - Added a summary metric for CPU usage
   - Added summary metrics for SSL
+  - Added HTTP Compression metrics
 
 * 0.0.5
   - Changed bytes to bits on throughput metrics

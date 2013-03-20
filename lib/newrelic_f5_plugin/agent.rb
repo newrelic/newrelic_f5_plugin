@@ -52,6 +52,7 @@ module NewRelic::F5Plugin
       report_global_connection_metrics(snmp)
       report_global_throughput_metrics(snmp)
       report_global_http_metrics(snmp)
+      report_global_http_compression_metrics(snmp)
       report_global_ssl_metrics(snmp)
       report_global_tcp_metrics(snmp)
 
@@ -237,6 +238,77 @@ module NewRelic::F5Plugin
       end
     end
 
+
+    #
+    # HTTP Compression Stats
+    #
+    def report_global_http_compression_metrics(snmp)
+      @oid_sysHttpCompressionStatPrecompressBytes       ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.2.0")
+      @oid_sysHttpCompressionStatPostcompressBytes      ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.3.0")
+      @oid_sysHttpCompressionStatHtmlPrecompressBytes   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.5.0")
+      @oid_sysHttpCompressionStatHtmlPostcompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.6.0")
+      @oid_sysHttpCompressionStatCssPrecompressBytes    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.7.0")
+      @oid_sysHttpCompressionStatCssPostcompressBytes   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.8.0")
+      @oid_sysHttpCompressionStatJsPrecompressBytes     ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.9.0")
+      @oid_sysHttpCompressionStatJsPostcompressBytes    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.10.0")
+      @oid_sysHttpCompressionStatXmlPrecompressBytes    ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.11.0")
+      @oid_sysHttpCompressionStatXmlPostcompressBytes   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.12.0")
+      @oid_sysHttpCompressionStatSgmlPrecompressBytes   ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.13.0")
+      @oid_sysHttpCompressionStatSgmlPostcompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.14.0")
+      @oid_sysHttpCompressionStatPlainPrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.15.0")
+      @oid_sysHttpCompressionStatPlainPostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.16.0")
+      @oid_sysHttpCompressionStatOctetPrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.17.0")
+      @oid_sysHttpCompressionStatOctetPostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.18.0")
+      @oid_sysHttpCompressionStatImagePrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.19.0")
+      @oid_sysHttpCompressionStatImagePostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.20.0")
+      @oid_sysHttpCompressionStatVideoPrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.21.0")
+      @oid_sysHttpCompressionStatVideoPostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.22.0")
+      @oid_sysHttpCompressionStatAudioPrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.23.0")
+      @oid_sysHttpCompressionStatAudioPostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.24.0")
+      @oid_sysHttpCompressionStatOtherPrecompressBytes  ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.25.0")
+      @oid_sysHttpCompressionStatOtherPostcompressBytes ||= SNMP::ObjectId.new("1.3.6.1.4.1.3375.2.1.1.2.22.26.0")
+
+      if snmp
+        res = snmp.get_value([@oid_sysHttpCompressionStatPrecompressBytes, @oid_sysHttpCompressionStatPostcompressBytes,
+                              @oid_sysHttpCompressionStatHtmlPrecompressBytes, @oid_sysHttpCompressionStatHtmlPostcompressBytes,
+                              @oid_sysHttpCompressionStatCssPrecompressBytes, @oid_sysHttpCompressionStatCssPostcompressBytes,
+                              @oid_sysHttpCompressionStatJsPrecompressBytes, @oid_sysHttpCompressionStatJsPostcompressBytes,
+                              @oid_sysHttpCompressionStatXmlPrecompressBytes, @oid_sysHttpCompressionStatXmlPostcompressBytes,
+                              @oid_sysHttpCompressionStatSgmlPrecompressBytes, @oid_sysHttpCompressionStatSgmlPostcompressBytes,
+                              @oid_sysHttpCompressionStatPlainPrecompressBytes, @oid_sysHttpCompressionStatPlainPostcompressBytes,
+                              @oid_sysHttpCompressionStatOctetPrecompressBytes, @oid_sysHttpCompressionStatOctetPostcompressBytes,
+                              @oid_sysHttpCompressionStatImagePrecompressBytes, @oid_sysHttpCompressionStatImagePostcompressBytes,
+                              @oid_sysHttpCompressionStatVideoPrecompressBytes, @oid_sysHttpCompressionStatVideoPostcompressBytes,
+                              @oid_sysHttpCompressionStatAudioPrecompressBytes, @oid_sysHttpCompressionStatAudioPostcompressBytes,
+                              @oid_sysHttpCompressionStatOtherPrecompressBytes, @oid_sysHttpCompressionStatOtherPostcompressBytes, ])
+
+        vals = res.map { |i| i.to_f * 8 } # Convert to bits
+        report_counter_metric "HTTP/Compression/Total/Pre",       "bits/sec",  vals[0]
+        report_counter_metric "HTTP/Compression/Total/Post",      "bits/sec",  vals[1]
+        report_counter_metric "HTTP/Compression/HTML/Pre",        "bits/sec",  vals[2]
+        report_counter_metric "HTTP/Compression/HTML/Post",       "bits/sec",  vals[3]
+        report_counter_metric "HTTP/Compression/CSS/Pre",         "bits/sec",  vals[4]
+        report_counter_metric "HTTP/Compression/CSS/Post",        "bits/sec",  vals[5]
+        report_counter_metric "HTTP/Compression/Javascript/Pre",  "bits/sec",  vals[6]
+        report_counter_metric "HTTP/Compression/Javascript/Post", "bits/sec",  vals[7]
+        report_counter_metric "HTTP/Compression/XML/Pre",         "bits/sec",  vals[8]
+        report_counter_metric "HTTP/Compression/XML/Post",        "bits/sec",  vals[9]
+        report_counter_metric "HTTP/Compression/SGML/Pre",        "bits/sec",  vals[10]
+        report_counter_metric "HTTP/Compression/SGML/Post",       "bits/sec",  vals[11]
+        report_counter_metric "HTTP/Compression/Plain/Pre",       "bits/sec",  vals[12]
+        report_counter_metric "HTTP/Compression/Plain/Post",      "bits/sec",  vals[13]
+        report_counter_metric "HTTP/Compression/Octet/Pre",       "bits/sec",  vals[14]
+        report_counter_metric "HTTP/Compression/Octet/Post",      "bits/sec",  vals[15]
+        report_counter_metric "HTTP/Compression/Image/Pre",       "bits/sec",  vals[16]
+        report_counter_metric "HTTP/Compression/Image/Post",      "bits/sec",  vals[17]
+        report_counter_metric "HTTP/Compression/Video/Pre",       "bits/sec",  vals[18]
+        report_counter_metric "HTTP/Compression/Video/Post",      "bits/sec",  vals[19]
+        report_counter_metric "HTTP/Compression/Audio/Pre",       "bits/sec",  vals[20]
+        report_counter_metric "HTTP/Compression/Audio/Post",      "bits/sec",  vals[21]
+        report_counter_metric "HTTP/Compression/Other/Pre",       "bits/sec",  vals[22]
+        report_counter_metric "HTTP/Compression/Other/Post",      "bits/sec",  vals[23]
+      end
+    end
 
     #
     # SSL Stats

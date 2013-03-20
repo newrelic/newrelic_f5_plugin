@@ -11,7 +11,9 @@ F5 MIB Tree Overview
       | | +-4     sysGlobalHttpStat
       | | +-12    sysGlobalTcpStat
       | | +-20    sysGlobalHost
-      | |    +- 4 sysGlobalHostCpuCount
+      | | | +-4   sysGlobalHostCpuCount
+      | | +-22    sysGlobalHttpCompressionStat
+      | |   +-2   sysHttpCompressionStatPrecompressBytes
       | 2         sysNetwork
       | +-4       sysInterfaces
       | 3         sysPlatform
