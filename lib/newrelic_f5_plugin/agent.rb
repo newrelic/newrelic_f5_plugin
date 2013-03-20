@@ -250,10 +250,14 @@ module NewRelic::F5Plugin
       if snmp
         res = snmp.get_value([@oid_sysClientsslStatTotNativeConns, @oid_sysClientsslStatTotCompatConns, @oid_sysServersslStatTotNativeConns,
                               @oid_sysServersslStatTotCompatConns])
-        report_counter_metric "SSL/Global/Client/Native", "trans/sec", res[0]
-        report_counter_metric "SSL/Global/Client/Compat", "trans/sec", res[1]
-        report_counter_metric "SSL/Global/Server/Native", "trans/sec", res[2]
-        report_counter_metric "SSL/Global/Server/Compat", "trans/sec", res[3]
+        vals = res.map { |i| i.to_i }
+        report_counter_metric "SSL/Global/Client/Native", "trans/sec", vals[0]
+        report_counter_metric "SSL/Global/Client/Compat", "trans/sec", vals[1]
+        report_counter_metric "SSL/Global/Server/Native", "trans/sec", vals[2]
+        report_counter_metric "SSL/Global/Server/Compat", "trans/sec", vals[3]
+        report_counter_metric "SSL/Global/Total/Client",  "trans/sec", (vals[0] + vals[1])
+        report_counter_metric "SSL/Global/Total/Server",  "trans/sec", (vals[2] + vals[3])
+        report_counter_metric "SSL/Global/Total/All",     "trans/sec", vals.inject(0) { |t,i| t + i }
       end
     end
 
