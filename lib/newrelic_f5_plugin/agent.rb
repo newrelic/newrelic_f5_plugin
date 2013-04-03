@@ -32,7 +32,6 @@ module NewRelic::F5Plugin
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 
-
     #
     # Required, but not used
     #
@@ -55,6 +54,11 @@ module NewRelic::F5Plugin
       report_global_http_compression_metrics(snmp)
       report_global_ssl_metrics(snmp)
       report_global_tcp_metrics(snmp)
+
+      node_status = NewRelic::F5Plugin::Nodes.get_status(snmp)
+      node_status.each_key { |m|
+        report_metric m, node_status[m][:label], node_status[m][:count]
+      }
 
       snmp.close
     rescue => e
