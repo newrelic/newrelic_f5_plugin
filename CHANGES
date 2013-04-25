@@ -1,5 +1,6 @@
 * 0.0.7
   - Initial reporting of Nodes (Monitor Status)
+  - Include a Total throughput summary metric
 
 * 0.0.6
   - Change the GUID to match the standard naming scheme
