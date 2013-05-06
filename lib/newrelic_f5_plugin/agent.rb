@@ -28,7 +28,7 @@ module NewRelic::F5Plugin
   #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    'com.newrelic.f5'
-    agent_version '0.0.7'
+    agent_version '0.0.8'
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 

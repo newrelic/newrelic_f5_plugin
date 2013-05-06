@@ -1,3 +1,7 @@
+* 0.0.8
+  - Updated to require newrelic_platform.gem > 0.2.10
+  - Added a total throughput metric
+
 * 0.0.7
   - Initial reporting of Nodes (Monitor Status)
   - Include a Total throughput summary metric
