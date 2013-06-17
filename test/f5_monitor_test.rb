@@ -14,8 +14,7 @@ class F5MonitorTest < Test::Unit::TestCase
     end
 
     should "show help" do
-      ::ARGV = %w[-h]
-      load @file
+      `#{@file} -h` =~ /Usage:/
     end
 
     should "run" do

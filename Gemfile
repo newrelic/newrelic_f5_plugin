@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 # This gemfile is used in the context of development on this plugin agent.
 
