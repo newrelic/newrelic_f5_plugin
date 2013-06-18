@@ -1,16 +1,40 @@
 = New Relic F5 Plugin
 
+The New Relic F5 Plugin enables integrated monitoring of your F5 Local Traffic
+Manager devices inside of New Relic.  Currently the following metrics are recorded:
+
+Device wide Metrics
+* CPU / Memory usage
+* Throughput (Total, Client side, Server side)
+* HTTP Requests (Requests/second, HTTP Methods, Status Codes, Versions)
+* HTTP Compression (Pre/Post broken down by content type)
+* SSL Requests/second
+* TCP Details (Current connections, connection rate, Server/Client side, Wait State)
+* Node status
+
+
+== Requirements
+
+=== Proxy host
+
+You need a host to install the plugin on that is able to poll the desired F5s via SNMP. That
+host also needs Ruby (tested with 1.8.7 and 1.9.3), and support for rubygems.
+
+
+=== F5
+
+This plugin has been tested with F5 LTM versions 11.2.x and 11.3.x.  Some metrics are reported on
+10.2.x, but the data is incomplete due to SNMP changes made by F5 between 10 and 11.
+
+A *read-only* SNMP community is required for each device to be monitored. Currently, only
+SNMP verison 2c is supported.
+
+
 == Instructions for running the F5 plugin agent
-
-Note: prior to general release, the platform gems will not be available on rubygems.org.  To
-install the platform gems, you need to download the project from the git repositories and do
-"rake build" followed by "gem install pkg/gemname.gem"
-
-The git repositories are all found at http://github.com/newrelic-platform
 
 1. Install the +newrelic_plugin+ gem.
 2. Install this gem.
-3. Create an installation directory.
+3. Create an installation directory (like /opt/newrelic/f5 ).
 4. In the installation directory, execute
 
       f5_monitor install -l LICENSE_KEY
