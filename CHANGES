@@ -1,3 +1,6 @@
+* 1.0.0
+  - Updated version for release!
+
 * 0.0.8
   - Updated to require newrelic_platform.gem > 0.2.10
   - Added a total throughput metric
