@@ -32,7 +32,10 @@ SNMP verison 2c is supported.
 
 == Installation and Running
 
-1. Install the [newrelic_plugin](https://github.com/newrelic-platform/newrelic_plugin) gem.
+1. Install the New Relic plugin gem from RubyGems:
+    
+      gem install newrelic_plugin
+
 2. Install this gem from RubyGems:
 
       gem install newrelic_f5_plugin
