@@ -30,10 +30,13 @@ A *read-only* SNMP community is required for each device to be monitored. Curren
 SNMP verison 2c is supported.
 
 
-== Instructions for running the F5 plugin agent
+== Installation and Running
 
-1. Install the +newrelic_plugin+ gem.
-2. Install this gem.
+1. Install the [newrelic_plugin](https://github.com/newrelic-platform/newrelic_plugin) gem.
+2. Install this gem from RubyGems:
+
+      gem install newrelic_f5_plugin
+
 3. Create an installation directory (like /opt/newrelic/f5 ).
 4. In the installation directory, execute
 
@@ -48,6 +51,9 @@ SNMP verison 2c is supported.
 == Developer Instructions
 
 1. Fork/Clone the repository
-2. Install bundler and do +bundle install+
-3. Do <b><tt>rake -T</tt></b> to see rake options, including tests.
+2. Install bundler and run:
+
+      bundle install
+
+3. Run <b><tt>rake -T</tt></b> to see rake options, including tests.
 
