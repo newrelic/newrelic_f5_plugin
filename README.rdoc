@@ -32,19 +32,18 @@ SNMP verison 2c is supported.
 
 == Installation and Running
 
-1. Install the [newrelic_plugin](https://github.com/newrelic-platform/newrelic_plugin) gem.
-2. Install this gem from RubyGems:
+1. Install this gem from RubyGems:
 
       gem install newrelic_f5_plugin
 
-3. Create an installation directory (like /opt/newrelic/f5 ).
-4. In the installation directory, execute
+2. Create an installation directory (like /opt/newrelic/f5 ).
+3. In the installation directory, execute
 
       f5_monitor install -l LICENSE_KEY
 
    using the license key from your New Relic account.
-5. Edit the +config/newrelic_plugin.yml+ file generated in step 4.  Setup name/hostname/port/snmp_community for each F5 you wish to monitor.
-6. Execute
+4. Edit the +config/newrelic_plugin.yml+ file generated in step 4.  Setup name/hostname/port/snmp_community for each F5 you wish to monitor.
+5. Execute
 
       f5_monitor run
 
