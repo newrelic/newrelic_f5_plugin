@@ -12,6 +12,12 @@ Device wide Metrics
 * TCP Details (Current connections, connection rate, Server/Client side, Wait State)
 * Node status
 
+Virtual Server Statistics
+* Requests per Second
+* Current Connections
+* Connections per Second
+* Inbound and Outbound Throughput
+
 
 == Requirements
 
