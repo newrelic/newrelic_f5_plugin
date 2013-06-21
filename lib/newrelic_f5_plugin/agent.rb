@@ -28,7 +28,7 @@ module NewRelic::F5Plugin
   #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    'com.newrelic.f5'
-    agent_version '1.0.0'
+    agent_version '1.0.1'  # FIXME This should come from NewRelic::F5Plugin VERSION constant
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 
@@ -59,6 +59,37 @@ module NewRelic::F5Plugin
       node_status.each_key { |m|
         report_metric m, node_status[m][:label], node_status[m][:count]
       }
+
+      #
+      # Collect virtual server statistics
+      #
+      vs = NewRelic::F5Plugin::Virtuals.new snmp
+      virtual_requests = vs.get_requests
+      virtual_requests.each_key { |m|
+        report_counter_metric m, "req/sec", virtual_requests[m]
+      }
+
+      virtual_conns_current = vs.get_conns_current
+      virtual_conns_current.each_key { |m|
+        report_metric m, "conns", virtual_conns_current[m]
+      }
+
+      virtual_conns_total = vs.get_conns_total
+      virtual_conns_total.each_key { |m|
+        report_counter_metric m, "conn/sec", virtual_conns_total[m]
+      }
+
+      virtual_throughput_in = vs.get_throughput_in
+      virtual_throughput_in.each_key { |m|
+        report_counter_metric m, "bits/sec", virtual_throughput_in[m]
+      }
+
+      virtual_throughput_out = vs.get_throughput_out
+      virtual_throughput_out.each_key { |m|
+        report_counter_metric m, "bits/sec", virtual_throughput_out[m]
+      }
+
+
 
       snmp.close
     rescue => e
