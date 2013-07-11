@@ -5,8 +5,8 @@ require 'bundler/setup'
 require 'newrelic_plugin'
 require 'snmp'
 
-
 module NewRelic::F5Plugin
+  VERSION = '1.0.1'
 
   # Register and run the agent
   def self.run
@@ -28,7 +28,7 @@ module NewRelic::F5Plugin
   #     Build: 1.3.6.1.4.1.3375.2.1.4.3.0
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    'com.newrelic.f5'
-    agent_version '1.0.1'  # FIXME This should come from NewRelic::F5Plugin VERSION constant
+    agent_version VERSION
     agent_config_options :hostname, :port, :snmp_community
     agent_human_labels('F5') { "#{hostname}" }
 
