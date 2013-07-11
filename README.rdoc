@@ -1,5 +1,6 @@
 = New Relic F5 Plugin
-[![Build Status](https://travis-ci.org/newrelic-platform/newrelic_f5_plugin.png)](https://travis-ci.org/newrelic-platform/newrelic_f5_plugin)
+{<img src="https://travis-ci.org/newrelic-platform/newrelic_f5_plugin.png" />}[https://travis-ci.org/newrelic-platform/newrelic_f5_plugin]
+
 
 The New Relic F5 Plugin enables integrated monitoring of your F5 Local Traffic
 Manager devices inside of New Relic.  Currently the following metrics are recorded:
