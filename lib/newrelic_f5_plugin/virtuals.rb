@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'bundler/setup'
 require 'newrelic_plugin'
 require 'snmp'
 

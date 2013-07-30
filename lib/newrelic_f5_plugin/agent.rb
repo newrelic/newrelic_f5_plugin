@@ -1,12 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'bundler/setup'
 require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.1'
+  VERSION = '1.0.2'
 
   # Register and run the agent
   def self.run

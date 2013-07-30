@@ -1,3 +1,6 @@
+* 1.0.2
+  - Removed bundler requirement as it was not needed
+
 * 1.0.1
   - Added Virtual Server statistics:
     - Requests per second
