@@ -1,3 +1,10 @@
+* 1.0.3
+  - Add Pool statistics:
+    - Requests per second
+    - Current Connections
+    - Connections per second
+    - Throughput (In/Out)
+
 * 1.0.2
   - Removed bundler requirement as it was not needed
 

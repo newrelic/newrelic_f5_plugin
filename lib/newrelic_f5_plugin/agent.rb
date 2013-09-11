@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.2'
+  VERSION = '1.0.3'
 
   # Register and run the agent
   def self.run
@@ -87,6 +87,34 @@ module NewRelic::F5Plugin
         report_counter_metric m, "bits/sec", virtual_throughput_out[m]
       }
 
+      #
+      # Collect pool statistics
+      #
+      pool = NewRelic::F5Plugin::Pools.new snmp
+      pool_requests = pool.get_requests
+      pool_requests.each_key { |m|
+        report_counter_metric m, "req/sec", pool_requests[m]
+      }
+
+      pool_conns_current = pool.get_conns_current
+      pool_conns_current.each_key { |m|
+        report_metric m, "conns", pool_conns_current[m]
+      }
+
+      pool_conns_total = pool.get_conns_total
+      pool_conns_total.each_key { |m|
+        report_counter_metric m, "conn/sec", pool_conns_total[m]
+      }
+
+      pool_throughput_in = pool.get_throughput_in
+      pool_throughput_in.each_key { |m|
+        report_counter_metric m, "bits/sec", pool_throughput_in[m]
+      }
+
+      pool_throughput_out = pool.get_throughput_out
+      pool_throughput_out.each_key { |m|
+        report_counter_metric m, "bits/sec", pool_throughput_out[m]
+      }
 
 
       snmp.close
