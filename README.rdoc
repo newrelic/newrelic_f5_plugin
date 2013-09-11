@@ -19,6 +19,7 @@ Virtual Server Statistics
 * Current Connections
 * Connections per Second
 * Inbound and Outbound Throughput
+* CPU Usage Ratio
 
 Pool Statistics
 * Requests per Second

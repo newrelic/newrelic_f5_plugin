@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.3'
+  VERSION = '1.0.4'
 
   # Register and run the agent
   def self.run
@@ -85,6 +85,11 @@ module NewRelic::F5Plugin
       virtual_throughput_out = vs.get_throughput_out
       virtual_throughput_out.each_key { |m|
         report_counter_metric m, "bits/sec", virtual_throughput_out[m]
+      }
+
+      virtual_cpu_usage_1m = vs.get_cpu_usage_1m
+      virtual_cpu_usage_1m.each_key { |m|
+        report_metric m, "%", virtual_cpu_usage_1m[m]
       }
 
       #
