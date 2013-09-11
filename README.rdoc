@@ -20,6 +20,12 @@ Virtual Server Statistics
 * Connections per Second
 * Inbound and Outbound Throughput
 
+Pool Statistics
+* Requests per Second
+* Current Connections
+* Connections per Second
+* Inbound and Outbound Throughput
+
 
 == Requirements
 
