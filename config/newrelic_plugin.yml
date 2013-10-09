@@ -16,12 +16,12 @@ newrelic:
   #
   # Update with your New Relic account license key:
   #
-  license_key: 'YOUR_LICENSE_KEY_HERE'
+  license_key: '357b98d02c6c34041b37efd8ee473b39a6f6c158'
   #
   # Set to '1' for verbose output, remove for normal output.
   # All output goes to stdout/stderr.
   #
-  #verbose: 1
+  verbose: 1
 
 
 #
@@ -32,7 +32,7 @@ agents:
     # Define one or more instances
     -
       name:           'My F5'
-      hostname:       'my-f5'
+      hostname:       'chi-prod-lb-1.nr-ops.net'
       port:           161
-      snmp_community: 'public'
+      snmp_community: 'newrelic'
 
