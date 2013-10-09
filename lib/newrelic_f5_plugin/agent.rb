@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.4'
+  VERSION = '1.0.5'
 
   # Register and run the agent
   def self.run
