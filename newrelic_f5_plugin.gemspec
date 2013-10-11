@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'newrelic_f5_plugin'
-  s.version           = '1.0.4'
+  s.version           = '1.0.5'
   s.date              = '2013-09-16'
   s.rubyforge_project = 'newrelic_f5_plugin'
 
@@ -51,7 +51,7 @@ This is the New Relic plugin for monitoring F5 devices developed by New Relic, I
   ## The newrelic_plugin needs to be installed.  Prior to public release, the
   # gem needs to be downloaded from git@github.com:newrelic-platform/newrelic_plugin.git
   # and built using the "rake build" command
-  s.add_dependency('newrelic_plugin', "= 1.0.2")
+  s.add_dependency('newrelic_plugin', "~> 1.3.0")
   s.add_dependency('snmp', ">= 1.1.0")
 
   s.post_install_message = <<-EOF
