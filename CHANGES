@@ -1,3 +1,8 @@
+* 1.0.5
+  - Upgrade to newer version of newrelic_plugin
+    - Add proxy support
+    - Improves connectivity to New Relic
+
 * 1.0.4
   - Add Virtual Server CPU usage metric based on the F5's 1 minute CPU ratio
 
