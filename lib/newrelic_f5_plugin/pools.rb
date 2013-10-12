@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'newrelic_plugin'
-require 'snmp'
 
 #  LtmPoolStatEntry
 #    ltmPoolStatName                                        LongDisplayString,
@@ -79,12 +78,17 @@ module NewRelic
         if snmp
           @pool_names.clear
 
-          snmp.walk([OID_LTM_POOL_STAT_NAME]) do |row|
-            row.each do |vb|
-              @pool_names.push(vb.value)
+          begin
+            snmp.walk([OID_LTM_POOL_STAT_NAME]) do |row|
+              row.each do |vb|
+                @pool_names.push(vb.value)
+              end
             end
+          rescue Exception => e
+            NewRelic::PlatformLogger.error("Unable to gather Pool names with error: #{e}")
           end
 
+          NewRelic::PlatformLogger.debug("Pools: Found #{@pool_names.size} pools")
           return @pool_names
         end
       end
@@ -95,22 +99,12 @@ module NewRelic
       # Gather Total Requests
       #
       def get_requests(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @pool_names.empty?
-
-          snmp.walk([OID_LTM_POOL_STAT_TOT_REQUESTS]) do |row|
-            row.each do |vb|
-              metrics["Pools/Requests/#{@pool_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Requests", @pool_names, OID_LTM_POOL_STAT_TOT_REQUESTS, snmp)
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Request metrics")
+        return res
       end
 
 
@@ -119,22 +113,12 @@ module NewRelic
       # Gather Connection count
       #
       def get_conns_current(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @pool_names.empty?
-
-          snmp.walk([OID_LTM_POOL_STAT_SERVER_CUR_CONNS]) do |row|
-            row.each do |vb|
-              metrics["Pools/Current Connections/#{@pool_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Current Connections", @pool_names, OID_LTM_POOL_STAT_SERVER_CUR_CONNS, snmp)
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Current Connection metrics")
+        return res
       end
 
 
@@ -143,22 +127,12 @@ module NewRelic
       # Gather Connection rate
       #
       def get_conns_total(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @pool_names.empty?
-
-          snmp.walk([OID_LTM_POOL_STAT_SERVER_TOT_CONNS]) do |row|
-            row.each do |vb|
-              metrics["Pools/Connection Rate/#{@pool_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Connection Rate", @pool_names, OID_LTM_POOL_STAT_SERVER_TOT_CONNS, snmp)
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Connection Rate metrics")
+        return res
       end
 
 
@@ -167,22 +141,12 @@ module NewRelic
       # Gather Throughput Inbound (returns in bits)
       #
       def get_throughput_in(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @pool_names.empty?
-
-          snmp.walk([OID_LTM_POOL_STAT_SERVER_BYTES_IN]) do |row|
-            row.each do |vb|
-              metrics["Pools/Throughput/In/#{@pool_names[index]}"] = (vb.value.to_f * 8)
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Throughput/In", @pool_names, OID_LTM_POOL_STAT_SERVER_BYTES_IN, snmp)
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Inbound Throughput metrics")
+        return res
       end
 
 
@@ -191,25 +155,13 @@ module NewRelic
       # Gather Throughput Inbound (returns in bits)
       #
       def get_throughput_out(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @pool_names.empty?
-
-          snmp.walk([OID_LTM_POOL_STAT_SERVER_BYTES_OUT]) do |row|
-            row.each do |vb|
-              metrics["Pools/Throughput/Out/#{@pool_names[index]}"] = (vb.value.to_f * 8)
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Throughput/Out", @pool_names, OID_LTM_POOL_STAT_SERVER_BYTES_OUT, snmp)
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Outbound Throughput metrics")
+        return res
       end
-
-
 
     end
   end

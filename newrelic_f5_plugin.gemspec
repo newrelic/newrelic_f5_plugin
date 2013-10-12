@@ -75,8 +75,10 @@ to find out how to install and run the plugin agent.
     config/newrelic_plugin.yml
     lib/newrelic_f5_plugin.rb
     lib/newrelic_f5_plugin/agent.rb
+    lib/newrelic_f5_plugin/device.rb
     lib/newrelic_f5_plugin/nodes.rb
     lib/newrelic_f5_plugin/pools.rb
+    lib/newrelic_f5_plugin/util.rb
     lib/newrelic_f5_plugin/virtuals.rb
     newrelic_f5_plugin.gemspec
     test/f5_monitor_test.rb

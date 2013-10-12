@@ -7,7 +7,9 @@ require 'snmp'
 module NewRelic
   module F5Plugin
 
-    module Nodes
+    class Nodes
+      attr_accessor :vs_names, :snmp_manager
+
       NODE_MONITOR_STATES = {
         0  => 'unchecked',
         1  => 'checking',
@@ -23,6 +25,21 @@ module NewRelic
         25 => 'disabled',
       }
 
+      OID_LTM_NODE_ADDR_MONITOR_STATUS = "1.3.6.1.4.1.3375.2.2.4.1.2.1.7"
+
+
+      #
+      # Init
+      #
+      def initialize(snmp = nil)
+        if snmp
+          @snmp_manager = snmp
+        else
+          @snmp_manager = nil
+        end
+      end
+
+
       #
       # Node Naming in SNMP
       #
@@ -33,26 +50,36 @@ module NewRelic
       #
       # Gather Node Status and report
       #
-      def self.get_status(snmp)
+      def get_status(snmp = nil)
+        snmp = snmp_manager unless snmp
+        metrics = { }
+        counter = 0
+
         if snmp
           # Init all the states with zeros so we always get them
           base_name = "Nodes/Monitor Status"
-          metrics = { }
           NODE_MONITOR_STATES.each do |key,value|
             metrics["#{base_name}/#{value}"] = { :label => "nodes", :count => 0 }
           end
 
           # ltmNodeAddrMonitorStatus
-          snmp.walk(["1.3.6.1.4.1.3375.2.2.4.1.2.1.7"]) do |row|
-            row.each do |vb|
-              metric_name = "#{base_name}/#{NODE_MONITOR_STATES[vb.value.to_i]}"
-              metrics[metric_name][:count]  += 1
+          begin
+            snmp.walk([OID_LTM_NODE_ADDR_MONITOR_STATUS]) do |row|
+              row.each do |vb|
+                metric_name = "#{base_name}/#{NODE_MONITOR_STATES[vb.value.to_i]}"
+                metrics[metric_name][:count]  += 1
+                counter += 1
+              end
             end
+          rescue Exception => e
+            NewRelic::PlatformLogger.error("Unable to gather Node Status metrics with error: #{e}")
           end
-
-          return metrics
         end
+
+        NewRelic::PlatformLogger.debug("Nodes: Got #{counter} Status metrics")
+        return metrics
       end
+
     end
   end
 end

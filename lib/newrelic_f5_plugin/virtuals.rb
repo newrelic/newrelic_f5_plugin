@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'newrelic_plugin'
-require 'snmp'
 
 #LtmVirtualServStatEntry
 #  ltmVirtualServStatName                                 LongDisplayString,
@@ -83,12 +82,17 @@ module NewRelic
         if snmp
           @vs_names.clear
 
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_NAME]) do |row|
-            row.each do |vb|
-              @vs_names.push(vb.value)
+          begin
+            snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_NAME]) do |row|
+              row.each do |vb|
+                @vs_names.push(vb.value)
+              end
             end
+          rescue Exception => e
+            NewRelic::PlatformLogger.error("Unable to gather Virtual Server names with error: #{e}")
           end
 
+          NewRelic::PlatformLogger.debug("Virtual Servers: Found #{@vs_names.size} virtual servers")
           return @vs_names
         end
       end
@@ -99,22 +103,12 @@ module NewRelic
       # Gather VS Total Requests
       #
       def get_requests(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_TOT_REQUESTS]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/Requests/#{@vs_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Requests", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_TOT_REQUESTS, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Request metrics")
+        return res
       end
 
 
@@ -123,22 +117,12 @@ module NewRelic
       # Gather VS Connection count
       #
       def get_conns_current(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_CLIENT_CUR_CONNS]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/Current Connections/#{@vs_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Current Connections", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_CUR_CONNS, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Current Connection metrics")
+        return res
       end
 
 
@@ -147,22 +131,12 @@ module NewRelic
       # Gather VS Connection rate
       #
       def get_conns_total(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_CLIENT_TOT_CONNS]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/Connection Rate/#{@vs_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Connection Rate", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_TOT_CONNS, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Connection Rate metrics")
+        return res
       end
 
 
@@ -171,22 +145,12 @@ module NewRelic
       # Gather VS Throughput Inbound (returns in bits)
       #
       def get_throughput_in(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_IN]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/Throughput/In/#{@vs_names[index]}"] = (vb.value.to_f * 8)
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Throughput/In", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_IN, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Inbound Throughput metrics")
+        return res
       end
 
 
@@ -195,22 +159,12 @@ module NewRelic
       # Gather VS Throughput Inbound (returns in bits)
       #
       def get_throughput_out(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_OUT]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/Throughput/Out/#{@vs_names[index]}"] = (vb.value.to_f * 8)
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Throughput/Out", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_OUT, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Outbound Throughput metrics")
+        return res
       end
 
 
@@ -219,25 +173,13 @@ module NewRelic
       # Gather VS Connection rate
       #
       def get_cpu_usage_1m(snmp = nil)
-        metrics = { }
-        index   = 0
-        snmp    = snmp_manager unless snmp
+        snmp = snmp_manager unless snmp
 
-        if snmp
-          get_names(snmp) if @vs_names.empty?
-
-          snmp.walk([OID_LTM_VIRTUAL_SERV_STAT_VS_USAGE_RATIO_1M]) do |row|
-            row.each do |vb|
-              metrics["Virtual Servers/CPU Usage/1m/#{@vs_names[index]}"] = vb.value.to_i
-              index += 1
-            end
-          end
-
-          return metrics
-        end
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/CPU Usage/1m", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_VS_USAGE_RATIO_1M, snmp)
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} CPU metrics")
+        return res
       end
-
-
 
     end
   end
