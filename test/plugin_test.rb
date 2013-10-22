@@ -23,6 +23,8 @@ EOF
     should "create a run" do
       # The run loop is stubbed out so this just verifies the agent initializes correctly.
       NewRelic::Plugin::Run.any_instance.expects :setup_from_config
+      NewRelic::Plugin::Run.any_instance.expects :setup_no_config_agents
+      NewRelic::Plugin::Run.any_instance.expects :agent_startup
       NewRelic::Plugin::Run.any_instance.expects :loop_forever
       NewRelic::F5Plugin.run
     end
