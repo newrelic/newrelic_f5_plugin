@@ -149,6 +149,7 @@ module NewRelic
 
         get_names(snmp) if @vs_names.empty?
         res = gather_snmp_metrics_by_name("Virtual Servers/Throughput/In", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_IN, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Inbound Throughput metrics")
         return res
       end
@@ -156,13 +157,14 @@ module NewRelic
 
 
       #
-      # Gather VS Throughput Inbound (returns in bits)
+      # Gather VS Throughput Outbound (returns in bits)
       #
       def get_throughput_out(snmp = nil)
         snmp = snmp_manager unless snmp
 
         get_names(snmp) if @vs_names.empty?
         res = gather_snmp_metrics_by_name("Virtual Servers/Throughput/Out", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_OUT, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Outbound Throughput metrics")
         return res
       end
