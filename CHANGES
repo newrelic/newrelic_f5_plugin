@@ -1,3 +1,10 @@
+* 1.0.10
+  - Add iRule statistics:
+    - Executions per second
+    - Failures per second
+    - Aborts per second
+    - Average cycles taken (requires timing to be enabled)
+
 * 1.0.9
   - Add SNAT Pools statistics:
     - Current Connections

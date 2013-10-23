@@ -146,6 +146,26 @@ module NewRelic::F5Plugin
       pool_throughput_out = pool.get_throughput_out
       pool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_out[m] } unless pool_throughput_out.nil?
 
+
+      #
+      # iRule statistics
+      #
+      NewRelic::PlatformLogger.debug("Collecting iRule stats")
+      rule = NewRelic::F5Plugin::Rules.new snmp
+
+      rule_execs = rule.get_executions
+      rule_execs.each_key { |m| report_counter_metric m, "execs/sec", rule_execs[m] } unless rule_execs.nil?
+
+      rule_failures = rule.get_failures
+      rule_failures.each_key { |m| report_counter_metric m, "failures/sec", rule_failures[m] } unless rule_failures.nil?
+
+      rule_aborts = rule.get_aborts
+      rule_aborts.each_key { |m| report_counter_metric m, "aborts/sec", rule_aborts[m] } unless rule_aborts.nil?
+
+      rule_cycles = rule.get_average_cycles
+      rule_cycles.each_key { |m| report_metric m, "cycles", rule_cycles[m] } unless rule_cycles.nil?
+
+
       #
       # Collect snat pool statistics
       #

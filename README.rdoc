@@ -27,6 +27,12 @@ Pool Statistics
 * Connections per Second
 * Inbound and Outbound Throughput
 
+iRule Statistics
+* Executions per Second
+* Failures per Second
+* Aborts per Second
+* Average cycles (requires timing enabled on the iRule)
+
 
 == Requirements
 
