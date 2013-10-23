@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'newrelic_f5_plugin'
   s.version           = '1.0.5'
-  s.date              = '2013-09-16'
+  s.date              = '2013-10-23'
   s.rubyforge_project = 'newrelic_f5_plugin'
 
   ## Make sure your summary is short. The description may be as long
@@ -82,6 +82,7 @@ to find out how to install and run the plugin agent.
     lib/newrelic_f5_plugin/virtuals.rb
     newrelic_f5_plugin.gemspec
     test/f5_monitor_test.rb
+    test/nodes_test.rb
     test/plugin_test.rb
     test/test_helper.rb
   ]
