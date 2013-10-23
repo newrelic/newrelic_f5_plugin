@@ -1,3 +1,6 @@
+* 1.0.6
+  - Fix throughput reporting issue caused by the refactor.
+
 * 1.0.5
   - Upgrade to newer version of newrelic_plugin
     - Add proxy support
