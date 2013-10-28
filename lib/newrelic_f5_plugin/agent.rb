@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.6'
+  VERSION = '1.0.7'
 
   # Register and run the agent
   def self.run
@@ -49,6 +49,10 @@ module NewRelic::F5Plugin
       # Device wide metrics
       #
       system = NewRelic::F5Plugin::Device.new snmp
+
+      system_version = system.get_version
+      NewRelic::PlatformLogger.debug("Found F5 device with version: #{system_version}")
+
       system_cpu = system.get_cpu
       system_cpu.each_key { |m| report_metric m, "%", system_cpu[m] } unless system_cpu.nil?
 

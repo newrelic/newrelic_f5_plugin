@@ -65,13 +65,43 @@ def gather_snmp_metrics_array(oids, snmp)
 
   if snmp
     begin
-      metrics = snmp.get_value(oids)
+      metrics = snmp.get_value(oids).map do |val|
+        # If an OID is missing, just return zero for that metric
+        if val.to_s == 'noSuchObject'
+          0
+        else
+          val
+        end
+      end
     rescue Exception => e
       NewRelic::PlatformLogger.error("Unable to gather SNMP metrics with error: #{e}")
-      return
     end
   end
 
   return metrics
 end
+
+
+#
+# Convert bytes to bits
+#
+def bytes_to_bits(vals)
+  ret = nil
+
+  if vals.class == Array
+    ret = vals.map { |i| i.to_f * 8 }
+  elsif vals.class == Hash
+    ret = { }
+    vals.keys.each do |k,v|
+      if v.nil?
+        ret[k] = v
+      else
+        ret[k] = v.to_f * 8
+      end
+    end
+  end
+
+  return ret
+end
+
 

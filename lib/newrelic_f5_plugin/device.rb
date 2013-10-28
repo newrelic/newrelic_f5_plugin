@@ -66,6 +66,11 @@ module NewRelic
       OID_SYS_HTTP_STAT_V11_RESP                             = "#{OID_SYS_HTTP_STAT}.15.0"
       OID_SYS_HTTP_STAT_V9_REQS                              = "#{OID_SYS_HTTP_STAT}.10.0"
       OID_SYS_HTTP_STAT_V9_RESP                              = "#{OID_SYS_HTTP_STAT}.13.0"
+      OID_SYS_PRODUCT                                        = "1.3.6.1.4.1.3375.2.1.4"
+      OID_SYS_PRODUCT_NAME                                   = "#{OID_SYS_PRODUCT}.1.0"
+      OID_SYS_PRODUCT_VERSION                                = "#{OID_SYS_PRODUCT}.2.0"
+      OID_SYS_PRODUCT_BUILD                                  = "#{OID_SYS_PRODUCT}.3.0"
+      OID_SYS_PRODUCT_EDITION                                = "#{OID_SYS_PRODUCT}.4.0"
       OID_SYS_SERVERSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.10.2.0"
       OID_SYS_SERVERSSL_STAT_TOT_COMPAT_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.9.0"
       OID_SYS_SERVERSSL_STAT_TOT_NATIVE_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.6.0"
@@ -113,6 +118,21 @@ module NewRelic
         end
       end
 
+      #
+      # Gather Version information
+      #
+      def get_version(snmp = nil)
+        version = "Unknown!"
+        snmp    = snmp_manager unless snmp
+
+        if snmp
+          res = gather_snmp_metrics_array([OID_SYS_PRODUCT_VERSION, OID_SYS_PRODUCT_BUILD], snmp)
+
+          version = "#{res[0]}.#{res[1]}" unless res.empty?
+        end
+
+        return version
+      end
 
 
       #
@@ -127,6 +147,9 @@ module NewRelic
                                            OID_SYS_GLOBAL_HOST_CPU_SYSTEM_1M, OID_SYS_GLOBAL_HOST_CPU_IRQ_1M, OID_SYS_GLOBAL_HOST_CPU_SOFTIRQ_1M,
                                            OID_SYS_GLOBAL_HOST_CPU_IOWAIT_1M],
                                            snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
 
           # In order to show the CPU usage as a total percentage, we divide by the number of cpus
           cpu_count = res[0].to_i
@@ -158,6 +181,9 @@ module NewRelic
         if snmp
           res = gather_snmp_metrics_array([OID_SYS_STAT_MEMORY_USED, OID_SYS_HOST_MEMORY_USED], snmp)
 
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
           metrics["Memory/TMM"]  = res[0]
           metrics["Memory/Host"] = res[1]
         end
@@ -177,6 +203,9 @@ module NewRelic
           res = gather_snmp_metrics_array([OID_SYS_STAT_CLIENT_CUR_CONNS, OID_SYS_STAT_SERVER_CUR_CONNS,
                                            OID_SYS_CLIENTSSL_STAT_CUR_CONNS, OID_SYS_SERVERSSL_STAT_CUR_CONNS],
                                          snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
 
           metrics["Connections/Current/Client"]     = res[0]
           metrics["Connections/Current/Server"]     = res[1]
@@ -198,6 +227,9 @@ module NewRelic
         if snmp
           res = gather_snmp_metrics_array([OID_SYS_STAT_CLIENT_TOT_CONNS, OID_SYS_STAT_SERVER_TOT_CONNS], snmp)
 
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
           metrics["Connections/Rate/Client"] = res[0]
           metrics["Connections/Rate/Server"] = res[1]
         end
@@ -217,6 +249,9 @@ module NewRelic
           res = gather_snmp_metrics_array([OID_SYS_STAT_CLIENT_BYTES_IN, OID_SYS_STAT_CLIENT_BYTES_OUT,
                                            OID_SYS_STAT_SERVER_BYTES_IN, OID_SYS_STAT_SERVER_BYTES_OUT],
                                            snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
 
           metrics["Throughput/Client/In"]  = (res[0].to_f * 8)
           metrics["Throughput/Client/Out"] = (res[1].to_f * 8)
@@ -243,6 +278,9 @@ module NewRelic
                                            OID_SYS_HTTP_STAT_V9_REQS,     OID_SYS_HTTP_STAT_V10_REQS, OID_SYS_HTTP_STAT_V11_REQS],
                                          snmp)
 
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
           metrics["HTTP/Method/All"]           = res[0]
           metrics["HTTP/Method/Get"]           = res[1]
           metrics["HTTP/Method/Post"]          = res[2]
@@ -268,6 +306,9 @@ module NewRelic
                                            OID_SYS_HTTP_STAT_V11_RESP,        OID_SYS_HTTP_STAT_RESP_BUCKET_1K,  OID_SYS_HTTP_STAT_RESP_BUCKET_4K,
                                            OID_SYS_HTTP_STAT_RESP_BUCKET_16K, OID_SYS_HTTP_STAT_RESP_BUCKET_32K],
                                          snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
 
           metrics["HTTP/Response Code/2xx"]        = res[0]
           metrics["HTTP/Response Code/3xx"]        = res[1]
@@ -308,7 +349,11 @@ module NewRelic
                                            OID_SYS_HTTP_COMPRESSION_STAT_OTHER_PRECOMPRESS_BYTES, OID_SYS_HTTP_COMPRESSION_STAT_OTHER_POSTCOMPRESS_BYTES],
                                          snmp)
 
-          vals = res.map { |i| i.to_f * 8 } # Convert to bits
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
+          vals = bytes_to_bits(res)
+
           metrics["HTTP/Compression/Total/Pre"]       = vals[0]
           metrics["HTTP/Compression/Total/Post"]      = vals[1]
           metrics["HTTP/Compression/HTML/Pre"]        = vals[2]
@@ -352,6 +397,9 @@ module NewRelic
                                            OID_SYS_SERVERSSL_STAT_TOT_NATIVE_CONNS, OID_SYS_SERVERSSL_STAT_TOT_COMPAT_CONNS],
                                            snmp)
 
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
           vals = res.map { |i| i.to_i }
 
           metrics["SSL/Global/Client/Native"] = vals[0]
@@ -379,6 +427,9 @@ module NewRelic
                                            OID_SYS_TCP_STAT_TIME_WAIT],
                                          snmp)
 
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
           metrics["TCP/Connection State/Open"]       = res[0]
           metrics["TCP/Connection State/Wait/Close"] = res[1]
           metrics["TCP/Connection State/Wait/FIN"]   = res[2]
@@ -398,6 +449,9 @@ module NewRelic
 
         if snmp
           res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_ACCEPTS], snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
 
           metrics["TCP/Accepts"] = res[0]
         end
