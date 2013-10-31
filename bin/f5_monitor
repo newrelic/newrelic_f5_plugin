@@ -26,6 +26,8 @@ EOF
   end
 
   opts.on("-h", "--help") do
+    spec = Gem::Specification::load(File.expand_path("../../newrelic_f5_plugin.gemspec", __FILE__))
+    puts "New Relic F5 Plugin version #{spec.version}"
     puts opts
     if File.basename($0) == File.basename(__FILE__)
       exit 0
