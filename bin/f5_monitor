@@ -5,6 +5,8 @@ require 'optparse'
 
 options = OptionParser.new do |opts|
   opts.banner = <<-EOF
+New Relic F5 Plugin version #{NewRelic::F5Plugin::VERSION}
+
 Usage:
   f5_monitor  ( run | install ) [options]
 EOF
@@ -26,7 +28,6 @@ EOF
   end
 
   opts.on("-h", "--help") do
-    puts "New Relic F5 Plugin version #{NewRelic::F5Plugin::VERSION}"
     puts opts
     if File.basename($0) == File.basename(__FILE__)
       exit 0
