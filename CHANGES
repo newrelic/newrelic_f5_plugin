@@ -1,3 +1,7 @@
+* 1.0.8
+  - Changed the name attribute to agent_name as name wasn't being picked up
+    and we don't want to break systems that might have it set.
+
 * 1.0.7
   - Better handling of older versions of BIG-IP (pre 11.3.0)
   - Print F5 version in debug logs
