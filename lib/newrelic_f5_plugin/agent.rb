@@ -27,14 +27,14 @@ module NewRelic::F5Plugin
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    'com.newrelic.f5'
     agent_version VERSION
-    agent_config_options :hostname, :port, :snmp_community, :display_name
-    agent_human_labels('F5') { "#{agent_name}" }
+    agent_config_options :hostname, :port, :snmp_community, :agent_name
+    agent_human_labels('F5') { "#{agent_label}" }
 
     #
     #
     #
-    def agent_name
-      return display_name unless display_name.nil?
+    def agent_label
+      return agent_name unless agent_name.nil?
       return hostname
     end
 

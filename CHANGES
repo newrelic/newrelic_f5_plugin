@@ -1,5 +1,5 @@
 * 1.0.8
-  - Changed the name attribute to display_name as name wasn't being picked up
+  - Changed the name attribute to agent_name as name wasn't being picked up
     and we don't want to break systems that might have it set.
 
 * 1.0.7
