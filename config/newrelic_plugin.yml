@@ -31,8 +31,12 @@ agents:
   f5:
     # Define one or more instances
     -
-      name:           'My F5'
       hostname:       'my-f5'
       port:           161
       snmp_community: 'public'
+#    -
+#      display_name:   'My Optional Label in New Relic'
+#      hostname:       'my-other-f5'
+#      port:           161
+#      snmp_community: 'public'
 

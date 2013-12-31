@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.7'
+  VERSION = '1.0.8'
 
   # Register and run the agent
   def self.run
@@ -27,8 +27,17 @@ module NewRelic::F5Plugin
   class Agent < NewRelic::Plugin::Agent::Base
     agent_guid    'com.newrelic.f5'
     agent_version VERSION
-    agent_config_options :hostname, :port, :snmp_community
-    agent_human_labels('F5') { "#{hostname}" }
+    agent_config_options :hostname, :port, :snmp_community, :display_name
+    agent_human_labels('F5') { "#{agent_name}" }
+
+    #
+    #
+    #
+    def agent_name
+      return display_name unless display_name.nil?
+      return hostname
+    end
+
 
     #
     # Required, but not used
