@@ -35,7 +35,7 @@ agents:
       port:           161
       snmp_community: 'public'
 #    -
-#      display_name:   'My Optional Label in New Relic'
+#      agent_name:     'Optional Label in New Relic (defaults to hostname)'
 #      hostname:       'my-other-f5'
 #      port:           161
 #      snmp_community: 'public'
