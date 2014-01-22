@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.8'
+  VERSION = '1.0.9'
 
   # Register and run the agent
   def self.run
@@ -145,6 +145,33 @@ module NewRelic::F5Plugin
 
       pool_throughput_out = pool.get_throughput_out
       pool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_out[m] } unless pool_throughput_out.nil?
+
+      #
+      # Collect snat pool statistics
+      #
+      NewRelic::PlatformLogger.debug("Collecting SNAT Pool stats")
+      snatpool = NewRelic::F5Plugin::SnatPools.new snmp
+
+      snatpool_conns_max = snatpool.get_conns_max
+      snatpool_conns_max.each_key { |m| report_metric m, "conns", snatpool_conns_max[m] } unless snatpool_conns_max.nil?
+
+      snatpool_conns_current = snatpool.get_conns_current
+      snatpool_conns_current.each_key { |m| report_metric m, "conns", snatpool_conns_current[m] } unless snatpool_conns_current.nil?
+
+      snatpool_conns_total = snatpool.get_conns_total
+      snatpool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", snatpool_conns_total[m] } unless snatpool_conns_total.nil?
+
+      snatpool_throughput_in = snatpool.get_throughput_in
+      snatpool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_in[m] } unless snatpool_throughput_in.nil?
+
+      snatpool_throughput_out = snatpool.get_throughput_out
+      snatpool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_out[m] } unless snatpool_throughput_out.nil?
+
+      snatpool_packets_in = snatpool.get_packets_in
+      snatpool_packets_in.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_in[m] } unless snatpool_packets_in.nil?
+
+      snatpool_packets_out = snatpool.get_packets_out
+      snatpool_packets_out.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_out[m] } unless snatpool_packets_out.nil?
 
       #
       # Cleanup snmp connection
