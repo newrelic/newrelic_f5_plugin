@@ -58,10 +58,8 @@ module NewRelic
           @rule_names.clear
 
           begin
-            snmp.walk([OID_LTM_RULE_STAT_NAME]) do |row|
-              row.each do |vb|
-                @rule_names.push(vb.value)
-              end
+            snmp.walk([OID_LTM_RULE_STAT_NAME, OID_LTM_RULE_STAT_TYPE]) do |rule, func|
+              @rule_names.push("#{rule.value}/#{func.value}")
             end
           rescue Exception => e
             NewRelic::PlatformLogger.error("Unable to gather iRule names with error: #{e}")
