@@ -4,6 +4,8 @@
     - Failures per second
     - Aborts per second
     - Average cycles taken (requires timing to be enabled)
+  - Updated SNMP connection logic to skip devices that are unreachable
+  - Skip collecting metrics if we can not get list of names for them
 
 * 1.0.9
   - Add SNAT Pools statistics:
