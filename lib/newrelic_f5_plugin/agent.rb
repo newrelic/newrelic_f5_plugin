@@ -50,8 +50,26 @@ module NewRelic::F5Plugin
     # This is called on every polling cycle
     #
     def poll_cycle
+      NewRelic::PlatformLogger.debug("Starting poll cycle for '#{hostname}'")
+
       # SNMP Stuff here
       snmp = SNMP::Manager.new(:host => hostname, :port => port, :community => snmp_community)
+
+      #
+      # Test our SNMP connection, return if we fail to connect so the entire agent doesn't quit
+      #
+      begin
+        product_name = snmp.get_value(["1.3.6.1.4.1.3375.2.1.4.1.0"]).first
+        NewRelic::PlatformLogger.debug("Found F5 device of type: '#{product_name}'")
+      rescue SNMP::RequestTimeout
+        NewRelic::PlatformLogger.error("Unable to connect to device: '#{hostname}', skipping...")
+        snmp.close
+        return
+      rescue => e
+        NewRelic::PlatformLogger.error(e)
+        snmp.close
+        return
+      end
 
 
       #
@@ -108,43 +126,49 @@ module NewRelic::F5Plugin
       #
       NewRelic::PlatformLogger.debug("Collecting Virtual Server stats")
       vs = NewRelic::F5Plugin::Virtuals.new snmp
-      virtual_requests = vs.get_requests
-      virtual_requests.each_key { |m| report_counter_metric m, "req/sec", virtual_requests[m] } unless virtual_requests.nil?
 
-      virtual_conns_current = vs.get_conns_current
-      virtual_conns_current.each_key { |m| report_metric m, "conns", virtual_conns_current[m] } unless virtual_conns_current.nil?
+      if vs.get_names
+        virtual_requests = vs.get_requests
+        virtual_requests.each_key { |m| report_counter_metric m, "req/sec", virtual_requests[m] } unless virtual_requests.nil?
 
-      virtual_conns_total = vs.get_conns_total
-      virtual_conns_total.each_key { |m| report_counter_metric m, "conn/sec", virtual_conns_total[m] } unless virtual_conns_total.nil?
+        virtual_conns_current = vs.get_conns_current
+        virtual_conns_current.each_key { |m| report_metric m, "conns", virtual_conns_current[m] } unless virtual_conns_current.nil?
 
-      virtual_throughput_in = vs.get_throughput_in
-      virtual_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", virtual_throughput_in[m] } unless virtual_throughput_in.nil?
+        virtual_conns_total = vs.get_conns_total
+        virtual_conns_total.each_key { |m| report_counter_metric m, "conn/sec", virtual_conns_total[m] } unless virtual_conns_total.nil?
 
-      virtual_throughput_out = vs.get_throughput_out
-      virtual_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", virtual_throughput_out[m] } unless virtual_throughput_out.nil?
+        virtual_throughput_in = vs.get_throughput_in
+        virtual_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", virtual_throughput_in[m] } unless virtual_throughput_in.nil?
 
-      virtual_cpu_usage_1m = vs.get_cpu_usage_1m
-      virtual_cpu_usage_1m.each_key { |m| report_metric m, "%", virtual_cpu_usage_1m[m] } unless virtual_cpu_usage_1m.nil?
+        virtual_throughput_out = vs.get_throughput_out
+        virtual_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", virtual_throughput_out[m] } unless virtual_throughput_out.nil?
+
+        virtual_cpu_usage_1m = vs.get_cpu_usage_1m
+        virtual_cpu_usage_1m.each_key { |m| report_metric m, "%", virtual_cpu_usage_1m[m] } unless virtual_cpu_usage_1m.nil?
+      end
 
       #
       # Collect pool statistics
       #
       NewRelic::PlatformLogger.debug("Collecting Pool stats")
       pool = NewRelic::F5Plugin::Pools.new snmp
-      pool_requests = pool.get_requests
-      pool_requests.each_key { |m| report_counter_metric m, "req/sec", pool_requests[m] } unless pool_requests.nil?
 
-      pool_conns_current = pool.get_conns_current
-      pool_conns_current.each_key { |m| report_metric m, "conns", pool_conns_current[m] } unless pool_conns_current.nil?
+      if pool.get_names
+        pool_requests = pool.get_requests
+        pool_requests.each_key { |m| report_counter_metric m, "req/sec", pool_requests[m] } unless pool_requests.nil?
 
-      pool_conns_total = pool.get_conns_total
-      pool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", pool_conns_total[m] } unless pool_conns_total.nil?
+        pool_conns_current = pool.get_conns_current
+        pool_conns_current.each_key { |m| report_metric m, "conns", pool_conns_current[m] } unless pool_conns_current.nil?
 
-      pool_throughput_in = pool.get_throughput_in
-      pool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_in[m] } unless pool_throughput_in.nil?
+        pool_conns_total = pool.get_conns_total
+        pool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", pool_conns_total[m] } unless pool_conns_total.nil?
 
-      pool_throughput_out = pool.get_throughput_out
-      pool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_out[m] } unless pool_throughput_out.nil?
+        pool_throughput_in = pool.get_throughput_in
+        pool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_in[m] } unless pool_throughput_in.nil?
+
+        pool_throughput_out = pool.get_throughput_out
+        pool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_out[m] } unless pool_throughput_out.nil?
+      end
 
 
       #
@@ -153,17 +177,19 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting iRule stats")
       rule = NewRelic::F5Plugin::Rules.new snmp
 
-      rule_execs = rule.get_executions
-      rule_execs.each_key { |m| report_counter_metric m, "execs/sec", rule_execs[m] } unless rule_execs.nil?
+      if rule.get_names
+        rule_execs = rule.get_executions
+        rule_execs.each_key { |m| report_counter_metric m, "execs/sec", rule_execs[m] } unless rule_execs.nil?
 
-      rule_failures = rule.get_failures
-      rule_failures.each_key { |m| report_counter_metric m, "failures/sec", rule_failures[m] } unless rule_failures.nil?
+        rule_failures = rule.get_failures
+        rule_failures.each_key { |m| report_counter_metric m, "failures/sec", rule_failures[m] } unless rule_failures.nil?
 
-      rule_aborts = rule.get_aborts
-      rule_aborts.each_key { |m| report_counter_metric m, "aborts/sec", rule_aborts[m] } unless rule_aborts.nil?
+        rule_aborts = rule.get_aborts
+        rule_aborts.each_key { |m| report_counter_metric m, "aborts/sec", rule_aborts[m] } unless rule_aborts.nil?
 
-      rule_cycles = rule.get_average_cycles
-      rule_cycles.each_key { |m| report_metric m, "cycles", rule_cycles[m] } unless rule_cycles.nil?
+        rule_cycles = rule.get_average_cycles
+        rule_cycles.each_key { |m| report_metric m, "cycles", rule_cycles[m] } unless rule_cycles.nil?
+      end
 
 
       #
@@ -172,26 +198,29 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting SNAT Pool stats")
       snatpool = NewRelic::F5Plugin::SnatPools.new snmp
 
-      snatpool_conns_max = snatpool.get_conns_max
-      snatpool_conns_max.each_key { |m| report_metric m, "conns", snatpool_conns_max[m] } unless snatpool_conns_max.nil?
+      if snatpool.get_names
+        snatpool_conns_max = snatpool.get_conns_max
+        snatpool_conns_max.each_key { |m| report_metric m, "conns", snatpool_conns_max[m] } unless snatpool_conns_max.nil?
 
-      snatpool_conns_current = snatpool.get_conns_current
-      snatpool_conns_current.each_key { |m| report_metric m, "conns", snatpool_conns_current[m] } unless snatpool_conns_current.nil?
+        snatpool_conns_current = snatpool.get_conns_current
+        snatpool_conns_current.each_key { |m| report_metric m, "conns", snatpool_conns_current[m] } unless snatpool_conns_current.nil?
 
-      snatpool_conns_total = snatpool.get_conns_total
-      snatpool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", snatpool_conns_total[m] } unless snatpool_conns_total.nil?
+        snatpool_conns_total = snatpool.get_conns_total
+        snatpool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", snatpool_conns_total[m] } unless snatpool_conns_total.nil?
 
-      snatpool_throughput_in = snatpool.get_throughput_in
-      snatpool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_in[m] } unless snatpool_throughput_in.nil?
+        snatpool_throughput_in = snatpool.get_throughput_in
+        snatpool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_in[m] } unless snatpool_throughput_in.nil?
 
-      snatpool_throughput_out = snatpool.get_throughput_out
-      snatpool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_out[m] } unless snatpool_throughput_out.nil?
+        snatpool_throughput_out = snatpool.get_throughput_out
+        snatpool_throughput_out.each_key { |m| report_counter_metric m, "bits/sec", snatpool_throughput_out[m] } unless snatpool_throughput_out.nil?
 
-      snatpool_packets_in = snatpool.get_packets_in
-      snatpool_packets_in.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_in[m] } unless snatpool_packets_in.nil?
+        snatpool_packets_in = snatpool.get_packets_in
+        snatpool_packets_in.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_in[m] } unless snatpool_packets_in.nil?
 
-      snatpool_packets_out = snatpool.get_packets_out
-      snatpool_packets_out.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_out[m] } unless snatpool_packets_out.nil?
+        snatpool_packets_out = snatpool.get_packets_out
+        snatpool_packets_out.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_out[m] } unless snatpool_packets_out.nil?
+      end
+
 
       #
       # Cleanup snmp connection
