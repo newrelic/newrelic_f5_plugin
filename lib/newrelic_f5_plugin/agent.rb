@@ -127,7 +127,7 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting Virtual Server stats")
       vs = NewRelic::F5Plugin::Virtuals.new snmp
 
-      if vs.get_names
+      unless vs.get_names.empty?
         virtual_requests = vs.get_requests
         virtual_requests.each_key { |m| report_counter_metric m, "req/sec", virtual_requests[m] } unless virtual_requests.nil?
 
@@ -153,7 +153,7 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting Pool stats")
       pool = NewRelic::F5Plugin::Pools.new snmp
 
-      if pool.get_names
+      unless pool.get_names.empty?
         pool_requests = pool.get_requests
         pool_requests.each_key { |m| report_counter_metric m, "req/sec", pool_requests[m] } unless pool_requests.nil?
 
@@ -177,7 +177,7 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting iRule stats")
       rule = NewRelic::F5Plugin::Rules.new snmp
 
-      if rule.get_names
+      unless rule.get_names.empty?
         rule_execs = rule.get_executions
         rule_execs.each_key { |m| report_counter_metric m, "execs/sec", rule_execs[m] } unless rule_execs.nil?
 
@@ -198,7 +198,7 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting SNAT Pool stats")
       snatpool = NewRelic::F5Plugin::SnatPools.new snmp
 
-      if snatpool.get_names
+      unless snatpool.get_names.empty?
         snatpool_conns_max = snatpool.get_conns_max
         snatpool_conns_max.each_key { |m| report_metric m, "conns", snatpool_conns_max[m] } unless snatpool_conns_max.nil?
 
