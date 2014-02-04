@@ -122,7 +122,7 @@ module NewRelic
 
         get_names(snmp) if @rule_names.empty?
         res = gather_snmp_metrics_by_name("Rules/Time", @rule_names, OID_LTM_RULE_STAT_AVG_CYCLES, snmp)
-        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Abort metrics")
+        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Average Cycle metrics")
         return res
       end
 
