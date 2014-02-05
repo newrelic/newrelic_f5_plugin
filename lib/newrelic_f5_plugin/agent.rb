@@ -241,6 +241,22 @@ module NewRelic::F5Plugin
         clientssl_session_cache_lookups = clientssl.get_session_cache_lookups
         clientssl_session_cache_lookups.each_key { |m| report_counter_metric m, "lookups/sec", clientssl_session_cache_lookups[m] } unless clientssl_session_cache_lookups.nil?
 
+        NewRelic::PlatformLogger.debug("Calculating Client SSL Profile hit ratios")
+        clientssl_hit_ratio = { }
+        clientssl_session_cache_hits.each_key do |h|
+          key = h.gsub(/^Client SSL Profiles\/Session Cache Hits\//, '')
+          l = "Client SSL Profiles/Session Cache Lookups/#{key}"
+          p = "Client SSL Profiles/Session Cache Hit Ratio/#{key}"
+          unless clientssl_session_cache_lookups[l].nil?
+            if clientssl_session_cache_lookups[l].to_f > 0
+              clientssl_hit_ratio[p] = (clientssl_session_cache_hits[h].to_f / clientssl_session_cache_lookups[l].to_f) * 100
+            else
+              clientssl_hit_ratio[p] = 0.0
+            end
+          end
+        end
+        clientssl_hit_ratio.each_key { |m| report_metric m, "%", clientssl_hit_ratio[m] } unless clientssl_hit_ratio.empty?
+
         clientssl_session_cache_overflows = clientssl.get_session_cache_overflows
         clientssl_session_cache_overflows.each_key { |m| report_counter_metric m, "overflows/sec", clientssl_session_cache_overflows[m] } unless clientssl_session_cache_overflows.nil?
 
