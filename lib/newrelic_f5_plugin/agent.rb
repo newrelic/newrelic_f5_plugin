@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.10'
+  VERSION = '1.0.11'
 
   # Register and run the agent
   def self.run
@@ -219,6 +219,33 @@ module NewRelic::F5Plugin
 
         snatpool_packets_out = snatpool.get_packets_out
         snatpool_packets_out.each_key { |m| report_counter_metric m, "pkts/sec", snatpool_packets_out[m] } unless snatpool_packets_out.nil?
+      end
+
+
+      #
+      # Collect Client SSL Profile statistics
+      #
+      NewRelic::PlatformLogger.debug("Collecting Client SSL Profile stats")
+      clientssl = NewRelic::F5Plugin::ClientSsl.new snmp
+
+      unless clientssl.get_names.empty?
+        clientssl_conns_current = clientssl.get_conns_current
+        clientssl_conns_current.each_key { |m| report_metric m, "conns", clientssl_conns_current[m] } unless clientssl_conns_current.nil?
+
+        clientssl_session_cache_current = clientssl.get_session_cache_current
+        clientssl_session_cache_current.each_key { |m| report_metric m, "entries", clientssl_session_cache_current[m] } unless clientssl_session_cache_current.nil?
+
+        clientssl_session_cache_hits = clientssl.get_session_cache_hits
+        clientssl_session_cache_hits.each_key { |m| report_counter_metric m, "hits/sec", clientssl_session_cache_hits[m] } unless clientssl_session_cache_hits.nil?
+
+        clientssl_session_cache_lookups = clientssl.get_session_cache_lookups
+        clientssl_session_cache_lookups.each_key { |m| report_counter_metric m, "lookups/sec", clientssl_session_cache_lookups[m] } unless clientssl_session_cache_lookups.nil?
+
+        clientssl_session_cache_overflows = clientssl.get_session_cache_overflows
+        clientssl_session_cache_overflows.each_key { |m| report_counter_metric m, "overflows/sec", clientssl_session_cache_overflows[m] } unless clientssl_session_cache_overflows.nil?
+
+        clientssl_session_cache_invalidations = clientssl.get_session_cache_invalidations
+        clientssl_session_cache_invalidations.each_key { |m| report_counter_metric m, "invld/sec", clientssl_session_cache_invalidations[m] } unless clientssl_session_cache_invalidations.nil?
       end
 
 

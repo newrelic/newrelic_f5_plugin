@@ -1,3 +1,12 @@
+* 1.0.11
+  - Add Client SSL profile statistics:
+    - Current connections
+    - Session Cache entries
+    - Session Cache hits/sec
+    - Session Cache lookups/sec
+    - Session Cache invalidations/sec
+  - Better logic for skipping metrics that do not exist
+
 * 1.0.10
   - Add iRule statistics:
     - Executions per second
