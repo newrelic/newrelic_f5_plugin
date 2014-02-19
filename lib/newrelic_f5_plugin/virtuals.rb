@@ -49,7 +49,9 @@ module NewRelic
       OID_LTM_VIRTUAL_SERV_STAT                   = "#{OID_LTM_VIRTUAL_SERVERS}.2"
       OID_LTM_VIRTUAL_SERV_ENTRY                  = "#{OID_LTM_VIRTUAL_SERV_STAT}.3.1"
       OID_LTM_VIRTUAL_SERV_STAT_NAME              = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.1"
+      OID_LTM_VIRTUAL_SERV_STAT_CLIENT_PKTS_IN    = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.6"
       OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_IN   = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.7"
+      OID_LTM_VIRTUAL_SERV_STAT_CLIENT_PKTS_OUT   = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.8"
       OID_LTM_VIRTUAL_SERV_STAT_CLIENT_BYTES_OUT  = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.9"
       OID_LTM_VIRTUAL_SERV_STAT_CLIENT_TOT_CONNS  = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.11"
       OID_LTM_VIRTUAL_SERV_STAT_CLIENT_CUR_CONNS  = "#{OID_LTM_VIRTUAL_SERV_ENTRY}.12"
@@ -136,6 +138,36 @@ module NewRelic
         get_names(snmp) if @vs_names.empty?
         res = gather_snmp_metrics_by_name("Virtual Servers/Connection Rate", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_TOT_CONNS, snmp)
         NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Connection Rate metrics")
+        return res
+      end
+
+
+
+      #
+      # Gather VS Packets Inbound
+      #
+      def get_packets_in (snmp = nil)
+        snmp = snmp_manager unless snmp
+
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Packets/In", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_PKTS_IN, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Inbound Packet metrics")
+        return res
+      end
+
+
+
+      #
+      # Gather VS Packets Outbound
+      #
+      def get_packets_out(snmp = nil)
+        snmp = snmp_manager unless snmp
+
+        get_names(snmp) if @vs_names.empty?
+        res = gather_snmp_metrics_by_name("Virtual Servers/Packets/Out", @vs_names, OID_LTM_VIRTUAL_SERV_STAT_CLIENT_PKTS_OUT, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
+        NewRelic::PlatformLogger.debug("Virtual Servers: Got #{res.size}/#{@vs_names.size} Outbound Packet metrics")
         return res
       end
 

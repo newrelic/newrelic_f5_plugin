@@ -137,6 +137,12 @@ module NewRelic::F5Plugin
         virtual_conns_total = vs.get_conns_total
         virtual_conns_total.each_key { |m| report_counter_metric m, "conn/sec", virtual_conns_total[m] } unless virtual_conns_total.nil?
 
+        virtual_packets_in = vs.get_packets_in
+        virtual_packets_in.each_key { |m| report_counter_metric m, "packets/sec", virtual_packets_in[m] } unless virtual_packets_in.nil?
+
+        virtual_packets_out = vs.get_packets_out
+        virtual_packets_out.each_key { |m| report_counter_metric m, "packets/sec", virtual_packets_out[m] } unless virtual_packets_out.nil?
+
         virtual_throughput_in = vs.get_throughput_in
         virtual_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", virtual_throughput_in[m] } unless virtual_throughput_in.nil?
 
