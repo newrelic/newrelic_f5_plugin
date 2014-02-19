@@ -46,7 +46,9 @@ module NewRelic
       OID_LTM_POOL_STAT                  = "#{OID_LTM_POOLS}.2"
       OID_LTM_POOL_ENTRY                 = "#{OID_LTM_POOL_STAT}.3.1"
       OID_LTM_POOL_STAT_NAME             = "#{OID_LTM_POOL_ENTRY}.1"
+      OID_LTM_POOL_STAT_SERVER_PKTS_IN   = "#{OID_LTM_POOL_ENTRY}.2"
       OID_LTM_POOL_STAT_SERVER_BYTES_IN  = "#{OID_LTM_POOL_ENTRY}.3"
+      OID_LTM_POOL_STAT_SERVER_PKTS_OUT  = "#{OID_LTM_POOL_ENTRY}.4"
       OID_LTM_POOL_STAT_SERVER_BYTES_OUT = "#{OID_LTM_POOL_ENTRY}.5"
       OID_LTM_POOL_STAT_SERVER_TOT_CONNS = "#{OID_LTM_POOL_ENTRY}.7"
       OID_LTM_POOL_STAT_SERVER_CUR_CONNS = "#{OID_LTM_POOL_ENTRY}.8"
@@ -138,6 +140,36 @@ module NewRelic
 
 
       #
+      # Gather Packets Inbound
+      #
+      def get_packets_in(snmp = nil)
+        snmp = snmp_manager unless snmp
+
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Packets/In", @pool_names, OID_LTM_POOL_STAT_SERVER_PKTS_IN, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Inbound Packet metrics")
+        return res
+      end
+
+
+
+      #
+      # Gather Packets Outbound
+      #
+      def get_packets_out(snmp = nil)
+        snmp = snmp_manager unless snmp
+
+        get_names(snmp) if @pool_names.empty?
+        res = gather_snmp_metrics_by_name("Pools/Packets/Out", @pool_names, OID_LTM_POOL_STAT_SERVER_PKTS_OUT, snmp)
+        res = res.each_key { |n| res[n] *= 8 }
+        NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@pool_names.size} Outbound Packet metrics")
+        return res
+      end
+
+
+
+      #
       # Gather Throughput Inbound (returns in bits)
       #
       def get_throughput_in(snmp = nil)
@@ -153,7 +185,7 @@ module NewRelic
 
 
       #
-      # Gather Throughput Inbound (returns in bits)
+      # Gather Throughput Outbound (returns in bits)
       #
       def get_throughput_out(snmp = nil)
         snmp = snmp_manager unless snmp

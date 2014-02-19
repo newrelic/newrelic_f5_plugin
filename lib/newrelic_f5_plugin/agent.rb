@@ -169,6 +169,12 @@ module NewRelic::F5Plugin
         pool_conns_total = pool.get_conns_total
         pool_conns_total.each_key { |m| report_counter_metric m, "conn/sec", pool_conns_total[m] } unless pool_conns_total.nil?
 
+        pool_packets_in = pool.get_packets_in
+        pool_packets_in.each_key { |m| report_counter_metric m, "packets/sec", pool_packets_in[m] } unless pool_packets_in.nil?
+
+        pool_packets_out = pool.get_packets_out
+        pool_packets_out.each_key { |m| report_counter_metric m, "packets/sec", pool_packets_out[m] } unless pool_packets_out.nil?
+
         pool_throughput_in = pool.get_throughput_in
         pool_throughput_in.each_key { |m| report_counter_metric m, "bits/sec", pool_throughput_in[m] } unless pool_throughput_in.nil?
 
