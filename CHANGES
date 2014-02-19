@@ -1,3 +1,8 @@
+* 1.0.12
+  - Added Virtual Servers and Pools statistics:
+    - Inbound Packets per second
+    - Outbound Packets per second
+
 * 1.0.11
   - Add Client SSL profile statistics:
     - Current connections

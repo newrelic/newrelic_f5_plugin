@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'newrelic_f5_plugin'
-  s.version           = '1.0.11'
-  s.date              = '2014-02-05'
+  s.version           = '1.0.12'
+  s.date              = '2014-02-19'
   s.rubyforge_project = 'newrelic_f5_plugin'
 
   ## Make sure your summary is short. The description may be as long
