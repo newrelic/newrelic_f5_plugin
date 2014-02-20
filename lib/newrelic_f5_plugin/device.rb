@@ -441,6 +441,75 @@ module NewRelic
 
 
       #
+      # Gather TCP Segment statistics
+      #
+      def get_tcp_segment_rates(snmp = nil)
+        metrics = { }
+        snmp    = snmp_manager unless snmp
+
+        if snmp
+          res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_RXBADSEG, OID_SYS_TCP_STAT_RXOOSEG,
+                                           OID_SYS_TCP_STAT_TXREXMITS],
+                                         snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
+          metrics["TCP/Segments/Received Malformed"]    = res[0]
+          metrics["TCP/Segments/Received Out of Order"] = res[1]
+          metrics["TCP/Segments/Retransmitted"]         = res[2]
+        end
+
+        return metrics
+      end
+
+
+      #
+      # Gather TCP Error statistics
+      #
+      def get_tcp_error_rates(snmp = nil)
+        metrics = { }
+        snmp    = snmp_manager unless snmp
+
+        if snmp
+          res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_RXRST, OID_SYS_TCP_STAT_RXBADSUM], snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
+          metrics["TCP/Errors/Received/Resets"]                = res[0]
+          metrics["TCP/Errors/Received/Bad Checksums"]         = res[1]
+        end
+
+        return metrics
+      end
+
+
+      #
+      # Gather TCP Syn statistics
+      #
+      def get_tcp_syn_rates(snmp = nil)
+        metrics = { }
+        snmp    = snmp_manager unless snmp
+
+        if snmp
+          res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_RXCOOKIE, OID_SYS_TCP_STAT_RXBADCOOKIE,
+                                           OID_SYS_TCP_STAT_SYNCACHEOVER],
+                                         snmp)
+
+          # Bail out if we didn't get anything
+          return metrics if res.empty?
+
+          metrics["TCP/SYN/Received SYN-Cookies"] = res[0]
+          metrics["TCP/SYN/Bad SYN-Cookies"]      = res[1]
+          metrics["TCP/SYN/SYN-cache Overflows"]  = res[2]
+        end
+
+        return metrics
+      end
+
+
+      #
       # Gather TCP Statistics in conn/sec
       #
       def get_tcp_connection_rates(snmp = nil)
@@ -448,12 +517,20 @@ module NewRelic
         snmp    = snmp_manager unless snmp
 
         if snmp
-          res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_ACCEPTS], snmp)
+          res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_ACCEPTS,  OID_SYS_TCP_STAT_ACCEPTFAILS,
+                                           OID_SYS_TCP_STAT_CONNECTS, OID_SYS_TCP_STAT_CONNFAILS,
+                                           OID_SYS_TCP_STAT_EXPIRES,  OID_SYS_TCP_STAT_ABANDONS],
+                                         snmp)
 
           # Bail out if we didn't get anything
           return metrics if res.empty?
 
-          metrics["TCP/Accepts"] = res[0]
+          metrics["TCP/Accepts"]                 = res[0]
+          metrics["TCP/Accept Fails"]            = res[1]
+          metrics["TCP/Connections/Established"] = res[2]
+          metrics["TCP/Connections/Failed"]      = res[3]
+          metrics["TCP/Connections/Expired"]     = res[4]
+          metrics["TCP/Connections/Abandoned"]   = res[5]
         end
 
         return metrics

@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.12'
+  VERSION = '1.0.13'
 
   # Register and run the agent
   def self.run
@@ -79,6 +79,7 @@ module NewRelic::F5Plugin
 
       system_version = system.get_version
       NewRelic::PlatformLogger.debug("Found F5 device with version: #{system_version}")
+      NewRelic::PlatformLogger.debug("Collecting System stats")
 
       system_cpu = system.get_cpu
       system_cpu.each_key { |m| report_metric m, "%", system_cpu[m] } unless system_cpu.nil?
@@ -112,6 +113,16 @@ module NewRelic::F5Plugin
 
       system_tcp_conn_rates = system.get_tcp_connection_rates
       system_tcp_conn_rates.each_key { |m| report_counter_metric m, "conn/sec", system_tcp_conn_rates[m] } unless system_tcp_conn_rates.nil?
+
+      system_tcp_syn_rates = system.get_tcp_syn_rates
+      system_tcp_syn_rates.each_key { |m| report_counter_metric m, "SYN/sec", system_tcp_syn_rates[m] } unless system_tcp_syn_rates.nil?
+
+      system_tcp_segment_rates = system.get_tcp_segment_rates
+      system_tcp_segment_rates.each_key { |m| report_counter_metric m, "segments/sec", system_tcp_segment_rates[m] } unless system_tcp_segment_rates.nil?
+
+      system_tcp_error_rates = system.get_tcp_error_rates
+      system_tcp_error_rates.each_key { |m| report_counter_metric m, "errs/sec", system_tcp_error_rates[m] } unless system_tcp_error_rates.nil?
+
 
       #
       # Node stats

@@ -1,3 +1,10 @@
+* 1.0.13
+  - Added more global TCP statistics:
+    - Received error rates: Bad Checksums, and Resets
+    - Segments: Retransmitted, RX Out of Order, and RX Malformed
+    - SYN-Cookies: Received, Bad, and Cache overflows
+    - Connections Failed, Expired, and Abandoned
+
 * 1.0.12
   - Added Virtual Servers and Pools statistics:
     - Inbound Packets per second
