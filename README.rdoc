@@ -68,6 +68,17 @@ SNMP version 2c is supported.
 
       f5_monitor run
 
+== Additional Configuration
+
+To configure proxy settings, add to the newrelic_plugin.yml file:
+
+      newrelic:
+        proxy:
+          address: PROXY_ADDRESS
+          port: PROXY_PORT
+          user: PROXY_USER
+          password: PROXY_PASSWORD
+
 == Installation with Chef/Puppet
 
 The F5 plugin can also be installed with {Chef}[http://www.getchef.com] and {Puppet}[http://puppetlabs.com]. For Chef and Puppet support see the New Relic plugin's {Chef Cookbook}[http://community.opscode.com/cookbooks/newrelic_plugins] and {Puppet Module}[https://forge.puppetlabs.com/newrelic/newrelic_plugins].
