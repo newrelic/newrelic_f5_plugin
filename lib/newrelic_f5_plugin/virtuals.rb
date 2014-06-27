@@ -44,7 +44,7 @@ module NewRelic
     class Virtuals
       attr_accessor :names, :snmp_manager
 
-      MAX_RESULTS                                 = 100
+      MAX_RESULTS                                 = 150
       OID_LTM_VIRTUAL_SERVERS                     = "1.3.6.1.4.1.3375.2.2.10"
       OID_LTM_VIRTUAL_SERV_STAT                   = "#{OID_LTM_VIRTUAL_SERVERS}.2"
       OID_LTM_VIRTUAL_SERV_ENTRY                  = "#{OID_LTM_VIRTUAL_SERV_STAT}.3.1"

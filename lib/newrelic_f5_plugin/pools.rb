@@ -42,7 +42,7 @@ module NewRelic
     class Pools
       attr_accessor :names, :snmp_manager
 
-      MAX_RESULTS                        = 100
+      MAX_RESULTS                        = 150
       OID_LTM_POOLS                      = "1.3.6.1.4.1.3375.2.2.5"
       OID_LTM_POOL_STAT                  = "#{OID_LTM_POOLS}.2"
       OID_LTM_POOL_ENTRY                 = "#{OID_LTM_POOL_STAT}.3.1"
