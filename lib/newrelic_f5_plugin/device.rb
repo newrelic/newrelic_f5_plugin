@@ -7,7 +7,7 @@ module NewRelic
   module F5Plugin
 
     class Device
-      attr_accessor :vs_names, :snmp_manager
+      attr_accessor :snmp_manager
 
       # Create the OIDs if they do not exist
       OID_SYS_CLIENTSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.9.2.0"
@@ -117,6 +117,62 @@ module NewRelic
           @snmp_manager = nil
         end
       end
+
+
+
+      #
+      # Perform polling and reportings of metrics
+      #
+      def poll(agent, snmp)
+        @snmp_manager = snmp
+
+        system_version = get_version
+        NewRelic::PlatformLogger.debug("Found F5 device with version: #{system_version}")
+
+        system_cpu = get_cpu
+        system_cpu.each_key { |m| agent.report_metric m, "%", system_cpu[m] } unless system_cpu.nil?
+
+        system_memory = get_memory
+        system_memory.each_key { |m| agent.report_metric m, "bytes", system_memory[m] } unless system_memory.nil?
+
+        system_connections = get_connections
+        system_connections.each_key { |m| agent.report_metric m, "conn", system_connections[m] } unless system_connections.nil?
+
+        system_connection_rates = get_connection_rates
+        system_connection_rates.each_key { |m| agent.report_counter_metric m, "conn/sec", system_connection_rates[m] } unless system_connection_rates.nil?
+
+        system_throughput = get_throughput
+        system_throughput.each_key { |m| agent.report_counter_metric m, "bits/sec", system_throughput[m] } unless system_throughput.nil?
+
+        system_http_reqs = get_http_requests
+        system_http_reqs.each_key { |m| agent.report_counter_metric m, "req/sec", system_http_reqs[m] } unless system_http_reqs.nil?
+
+        system_http_resp = get_http_responses
+        system_http_resp.each_key { |m| agent.report_counter_metric m, "resp/sec", system_http_resp[m] } unless system_http_resp.nil?
+
+        system_http_compression = get_http_compression
+        system_http_compression.each_key { |m| agent.report_counter_metric m, "bits/sec", system_http_compression[m] } unless system_http_compression.nil?
+
+        system_ssl = get_ssl
+        system_ssl.each_key { |m| agent.report_counter_metric m, "trans/sec", system_ssl[m] } unless system_ssl.nil?
+
+        system_tcp_conns = get_tcp_connections
+        system_tcp_conns.each_key { |m| agent.report_metric m, "conn", system_tcp_conns[m] } unless system_tcp_conns.nil?
+
+        system_tcp_conn_rates = get_tcp_connection_rates
+        system_tcp_conn_rates.each_key { |m| agent.report_counter_metric m, "conn/sec", system_tcp_conn_rates[m] } unless system_tcp_conn_rates.nil?
+
+        system_tcp_syn_rates = get_tcp_syn_rates
+        system_tcp_syn_rates.each_key { |m| agent.report_counter_metric m, "SYN/sec", system_tcp_syn_rates[m] } unless system_tcp_syn_rates.nil?
+
+        system_tcp_segment_rates = get_tcp_segment_rates
+        system_tcp_segment_rates.each_key { |m| agent.report_counter_metric m, "segments/sec", system_tcp_segment_rates[m] } unless system_tcp_segment_rates.nil?
+
+        system_tcp_error_rates = get_tcp_error_rates
+        system_tcp_error_rates.each_key { |m| agent.report_counter_metric m, "errs/sec", system_tcp_error_rates[m] } unless system_tcp_error_rates.nil?
+      end
+
+
 
       #
       # Gather Version information

@@ -19,7 +19,7 @@ module NewRelic
   module F5Plugin
 
     class Rules
-      attr_accessor :rule_names, :snmp_manager
+      attr_accessor :names, :snmp_manager
 
       OID_LTM_RULES                 = "1.3.6.1.4.1.3375.2.2.8"
       OID_LTM_RULE_STAT             = "#{OID_LTM_RULES}.3"
@@ -37,7 +37,7 @@ module NewRelic
       # Init
       #
       def initialize(snmp = nil)
-        @rule_names = [ ]
+        @names = [ ]
 
         if snmp
           @snmp_manager = snmp
@@ -49,24 +49,46 @@ module NewRelic
 
 
       #
+      # Perform polling and reportings of metrics
+      #
+      def poll(agent, snmp)
+        @snmp_manager = snmp
+
+        unless get_names.empty?
+          rule_execs = get_executions
+          rule_execs.each_key { |m| agent.report_counter_metric m, "execs/sec", rule_execs[m] } unless rule_execs.nil?
+
+          rule_failures = get_failures
+          rule_failures.each_key { |m| agent.report_counter_metric m, "failures/sec", rule_failures[m] } unless rule_failures.nil?
+
+          rule_aborts = get_aborts
+          rule_aborts.each_key { |m| agent.report_counter_metric m, "aborts/sec", rule_aborts[m] } unless rule_aborts.nil?
+
+          rule_cycles = get_average_cycles
+          rule_cycles.each_key { |m| agent.report_metric m, "cycles", rule_cycles[m] } unless rule_cycles.nil?
+        end
+      end
+
+
+      #
       # Get the list of iRule names
       #
       def get_names(snmp = nil)
         snmp = snmp_manager unless snmp
 
         if snmp
-          @rule_names.clear
+          @names.clear
 
           begin
             snmp.walk([OID_LTM_RULE_STAT_NAME, OID_LTM_RULE_STAT_TYPE]) do |rule, func|
-              @rule_names.push("#{rule.value}/#{func.value}")
+              @names.push("#{rule.value}/#{func.value}")
             end
           rescue Exception => e
             NewRelic::PlatformLogger.error("Unable to gather iRule names with error: #{e}")
           end
 
-          NewRelic::PlatformLogger.debug("Rules: Found #{@rule_names.size} iRules")
-          return @rule_names
+          NewRelic::PlatformLogger.debug("Rules: Found #{@names.size} iRules")
+          return @names
         end
       end
 
@@ -78,9 +100,9 @@ module NewRelic
       def get_executions(snmp = nil)
         snmp = snmp_manager unless snmp
 
-        get_names(snmp) if @rule_names.empty?
-        res = gather_snmp_metrics_by_name("Rules/Executions", @rule_names, OID_LTM_RULE_STAT_TOT_EXEC, snmp)
-        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Execution metrics")
+        get_names(snmp) if @names.empty?
+        res = gather_snmp_metrics_by_name("Rules/Executions", @names, OID_LTM_RULE_STAT_TOT_EXEC, snmp)
+        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@names.size} Execution metrics")
         return res
       end
 
@@ -92,9 +114,9 @@ module NewRelic
       def get_failures(snmp = nil)
         snmp = snmp_manager unless snmp
 
-        get_names(snmp) if @rule_names.empty?
-        res = gather_snmp_metrics_by_name("Rules/Failures", @rule_names, OID_LTM_RULE_STAT_FAILURES, snmp)
-        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Failure metrics")
+        get_names(snmp) if @names.empty?
+        res = gather_snmp_metrics_by_name("Rules/Failures", @names, OID_LTM_RULE_STAT_FAILURES, snmp)
+        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@names.size} Failure metrics")
         return res
       end
 
@@ -106,9 +128,9 @@ module NewRelic
       def get_aborts(snmp = nil)
         snmp = snmp_manager unless snmp
 
-        get_names(snmp) if @rule_names.empty?
-        res = gather_snmp_metrics_by_name("Rules/Aborts", @rule_names, OID_LTM_RULE_STAT_ABORTS, snmp)
-        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Abort metrics")
+        get_names(snmp) if @names.empty?
+        res = gather_snmp_metrics_by_name("Rules/Aborts", @names, OID_LTM_RULE_STAT_ABORTS, snmp)
+        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@names.size} Abort metrics")
         return res
       end
 
@@ -120,9 +142,9 @@ module NewRelic
       def get_average_cycles(snmp = nil)
         snmp = snmp_manager unless snmp
 
-        get_names(snmp) if @rule_names.empty?
-        res = gather_snmp_metrics_by_name("Rules/Time", @rule_names, OID_LTM_RULE_STAT_AVG_CYCLES, snmp)
-        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@rule_names.size} Average Cycle metrics")
+        get_names(snmp) if @names.empty?
+        res = gather_snmp_metrics_by_name("Rules/Time", @names, OID_LTM_RULE_STAT_AVG_CYCLES, snmp)
+        NewRelic::PlatformLogger.debug("Rules: Got #{res.size}/#{@names.size} Average Cycle metrics")
         return res
       end
 

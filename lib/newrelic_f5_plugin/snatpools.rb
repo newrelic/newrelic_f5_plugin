@@ -53,6 +53,38 @@ module NewRelic
 
 
       #
+      # Perform polling and reportings of metrics
+      #
+      def poll(agent, snmp)
+        @snmp_manager = snmp
+
+        unless get_names.empty?
+          snatpool_conns_max = get_conns_max
+          snatpool_conns_max.each_key { |m| agent.report_metric m, "conns", snatpool_conns_max[m] } unless snatpool_conns_max.nil?
+
+          snatpool_conns_current = get_conns_current
+          snatpool_conns_current.each_key { |m| agent.report_metric m, "conns", snatpool_conns_current[m] } unless snatpool_conns_current.nil?
+
+          snatpool_conns_total = get_conns_total
+          snatpool_conns_total.each_key { |m| agent.report_counter_metric m, "conn/sec", snatpool_conns_total[m] } unless snatpool_conns_total.nil?
+
+          snatpool_throughput_in = get_throughput_in
+          snatpool_throughput_in.each_key { |m| agent.report_counter_metric m, "bits/sec", snatpool_throughput_in[m] } unless snatpool_throughput_in.nil?
+
+          snatpool_throughput_out = get_throughput_out
+          snatpool_throughput_out.each_key { |m| agent.report_counter_metric m, "bits/sec", snatpool_throughput_out[m] } unless snatpool_throughput_out.nil?
+
+          snatpool_packets_in = get_packets_in
+          snatpool_packets_in.each_key { |m| agent.report_counter_metric m, "pkts/sec", snatpool_packets_in[m] } unless snatpool_packets_in.nil?
+
+          snatpool_packets_out = get_packets_out
+          snatpool_packets_out.each_key { |m| agent.report_counter_metric m, "pkts/sec", snatpool_packets_out[m] } unless snatpool_packets_out.nil?
+        end
+      end
+
+
+
+      #
       # Get the list of Pool names
       #
       def get_names(snmp = nil)

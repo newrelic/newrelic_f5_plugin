@@ -8,7 +8,7 @@ module NewRelic
   module F5Plugin
 
     class Nodes
-      attr_accessor :vs_names, :snmp_manager
+      attr_accessor :snmp_manager
 
       NODE_MONITOR_STATES = {
         0  => 'unchecked',
@@ -38,6 +38,19 @@ module NewRelic
           @snmp_manager = nil
         end
       end
+
+
+
+      #
+      # Perform polling and reportings of metrics
+      #
+      def poll(agent, snmp)
+        @snmp_manager = snmp
+
+        node_status = get_status
+        node_status.each_key { |m| agent.report_metric m, node_status[m][:label], node_status[m][:count] } unless node_status.nil?
+      end
+
 
 
       #

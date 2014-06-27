@@ -105,6 +105,48 @@ module NewRelic
       end
 
 
+      #
+      # Perform polling and reportings of metrics
+      #
+      def poll(agent, snmp)
+        @snmp_manager = snmp
+
+        unless get_names.empty?
+          clientssl_conns_current = get_conns_current
+          clientssl_conns_current.each_key { |m| agent.report_metric m, "conns", clientssl_conns_current[m] } unless clientssl_conns_current.nil?
+
+          clientssl_session_cache_current = get_session_cache_current
+          clientssl_session_cache_current.each_key { |m| agent.report_metric m, "entries", clientssl_session_cache_current[m] } unless clientssl_session_cache_current.nil?
+
+          clientssl_session_cache_hits = get_session_cache_hits
+          clientssl_session_cache_hits.each_key { |m| agent.report_counter_metric m, "hits/sec", clientssl_session_cache_hits[m] } unless clientssl_session_cache_hits.nil?
+
+          clientssl_session_cache_lookups = get_session_cache_lookups
+          clientssl_session_cache_lookups.each_key { |m| agent.report_counter_metric m, "lookups/sec", clientssl_session_cache_lookups[m] } unless clientssl_session_cache_lookups.nil?
+
+          NewRelic::PlatformLogger.debug("Calculating Client SSL Profile hit ratios")
+          clientssl_hit_ratio = { }
+          clientssl_session_cache_hits.each_key do |h|
+            key = h.gsub(/^Client SSL Profiles\/Session Cache Hits\//, '')
+            l = "Client SSL Profiles/Session Cache Lookups/#{key}"
+            p = "Client SSL Profiles/Session Cache Hit Ratio/#{key}"
+            unless clientssl_session_cache_lookups[l].nil?
+              if clientssl_session_cache_lookups[l].to_f > 0
+                clientssl_hit_ratio[p] = (clientssl_session_cache_hits[h].to_f / clientssl_session_cache_lookups[l].to_f) * 100
+              else
+                clientssl_hit_ratio[p] = 0.0
+              end
+            end
+          end
+          clientssl_hit_ratio.each_key { |m| agent.report_metric m, "%", clientssl_hit_ratio[m] } unless clientssl_hit_ratio.empty?
+
+          clientssl_session_cache_overflows = get_session_cache_overflows
+          clientssl_session_cache_overflows.each_key { |m| agent.report_counter_metric m, "overflows/sec", clientssl_session_cache_overflows[m] } unless clientssl_session_cache_overflows.nil?
+
+          clientssl_session_cache_invalidations = get_session_cache_invalidations
+          clientssl_session_cache_invalidations.each_key { |m| agent.report_counter_metric m, "invld/sec", clientssl_session_cache_invalidations[m] } unless clientssl_session_cache_invalidations.nil?
+        end
+      end
 
       #
       # Get the list of iRule names
