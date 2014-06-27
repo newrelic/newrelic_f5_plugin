@@ -116,7 +116,7 @@ module NewRelic
             NewRelic::PlatformLogger.error("Unable to gather Virtual Server names with error: #{e}")
           end
 
-          NewRelic::PlatformLogger.debug("Virtual Servers: Found #{@names.size} virtual servers, reporting the top #{MAX_RESULTS} max.")
+          NewRelic::PlatformLogger.debug("Virtual Servers: Found #{@names.size} virtual servers, reporting the top #{MAX_RESULTS} (max)")
           return @names
         end
       end
