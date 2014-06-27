@@ -1,3 +1,8 @@
+* 1.0.14
+  - Refactored the agent code so each module is more self contained
+  - Limit data reported for Virtuals and Pools to the top 100 as this
+    is all the UI will display
+
 * 1.0.13
   - Added more global TCP statistics:
     - Received error rates: Bad Checksums, and Resets
