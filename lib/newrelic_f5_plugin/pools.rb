@@ -206,7 +206,6 @@ module NewRelic
 
         get_names(snmp) if @names.empty?
         res = gather_snmp_metrics_by_name("Pools/Packets/In", @names, OID_LTM_POOL_STAT_SERVER_PKTS_IN, snmp)
-        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@names.size} Inbound Packet metrics")
 
         unless res.nil?
@@ -235,7 +234,6 @@ module NewRelic
 
         get_names(snmp) if @names.empty?
         res = gather_snmp_metrics_by_name("Pools/Packets/Out", @names, OID_LTM_POOL_STAT_SERVER_PKTS_OUT, snmp)
-        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@names.size} Outbound Packet metrics")
 
         unless res.nil?
@@ -264,7 +262,6 @@ module NewRelic
 
         get_names(snmp) if @names.empty?
         res = gather_snmp_metrics_by_name("Pools/Throughput/In", @names, OID_LTM_POOL_STAT_SERVER_BYTES_IN, snmp)
-        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@names.size} Inbound Throughput metrics")
 
         unless res.nil?
@@ -293,7 +290,6 @@ module NewRelic
 
         get_names(snmp) if @names.empty?
         res = gather_snmp_metrics_by_name("Pools/Throughput/Out", @names, OID_LTM_POOL_STAT_SERVER_BYTES_OUT, snmp)
-        res = res.each_key { |n| res[n] *= 8 }
         NewRelic::PlatformLogger.debug("Pools: Got #{res.size}/#{@names.size} Outbound Throughput metrics")
 
         unless res.nil?
