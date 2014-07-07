@@ -1,3 +1,6 @@
+* 1.0.15
+  - Fix bug in 1.0.14 where pool data collection was multiplied by 8 twice
+
 * 1.0.14
   - Refactored the agent code so each module is more self contained
   - Limit data reported for Virtuals and Pools to the top 150
