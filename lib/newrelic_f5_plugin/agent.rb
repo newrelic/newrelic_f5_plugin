@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.15'
+  VERSION = '1.0.16'
 
   # Register and run the agent
   def self.run
@@ -76,6 +76,11 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting System stats")
       @system ||= NewRelic::F5Plugin::Device.new
       @system.poll(self, snmp)
+
+      # Device Interface metrics
+      NewRelic::PlatformLogger.debug("Collecting Interface stats")
+      @interfaces ||= NewRelic::F5Plugin::Interfaces.new
+      @interfaces.poll(self, snmp)
 
       # Node stats
       NewRelic::PlatformLogger.debug("Collecting Node stats")
