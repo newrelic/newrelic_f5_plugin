@@ -14,6 +14,14 @@ Device wide Metrics
 * TCP Details (Current connections, connection rate, Server/Client side, Wait State)
 * Node status
 
+Interface Statistics
+* State (Up/Down)
+* Throughput
+* Packets per Second (Unicast / Multicast)
+* Errors per Second
+* Dropped packets per Second
+* Collisions per Second
+
 Virtual Server Statistics
 * Requests per Second
 * Current Connections

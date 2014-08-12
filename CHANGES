@@ -1,3 +1,12 @@
+* 1.0.16
+  - Added Interface statistics
+    - State
+    - Throughput
+    - Packets per second (Unicast/Multicast)
+    - Errors per second
+    - Dropped packets per second
+    - Collisions per second
+
 * 1.0.15
   - Fix bug in 1.0.14 where pool data collection was multiplied by 8 twice
 

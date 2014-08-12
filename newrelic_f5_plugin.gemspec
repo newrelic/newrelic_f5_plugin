@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   ## If your rubyforge_project name is different, then edit it and comment out
   ## the sub! line in the Rakefile
   s.name              = 'newrelic_f5_plugin'
-  s.version           = '1.0.15'
-  s.date              = '2014-07-07'
+  s.version           = '1.0.16'
+  s.date              = '2014-08-12'
   s.rubyforge_project = 'newrelic_f5_plugin'
   s.licenses          = ['MIT']
 
@@ -78,6 +78,7 @@ to find out how to install and run the plugin agent.
     lib/newrelic_f5_plugin/agent.rb
     lib/newrelic_f5_plugin/client_ssl.rb
     lib/newrelic_f5_plugin/device.rb
+    lib/newrelic_f5_plugin/interfaces.rb
     lib/newrelic_f5_plugin/nodes.rb
     lib/newrelic_f5_plugin/pools.rb
     lib/newrelic_f5_plugin/rules.rb
