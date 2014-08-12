@@ -51,6 +51,12 @@ module NewRelic
         0 => 'Disabled',
         1 => 'Enabled',
       }
+      INTERFACE_STATUS_STATES = {
+        0 => 'Up',
+        1 => 'Down',
+        3 => 'Uninitialized',
+        5 => 'Unpopulated',
+      }
       INTERFACE_DUPLEX_STATES = {
         0 => 'None',
         1 => 'Half',
@@ -71,6 +77,7 @@ module NewRelic
       OID_SYS_INTERFACE_MAC_ADDR            = "#{OID_SYS_INTERFACE_ENTRY}.6"
       OID_SYS_INTERFACE_MTU                 = "#{OID_SYS_INTERFACE_ENTRY}.7"
       OID_SYS_INTERFACE_ENABLED             = "#{OID_SYS_INTERFACE_ENTRY}.8"
+      OID_SYS_INTERFACE_STATUS              = "#{OID_SYS_INTERFACE_ENTRY}.17"
 
       # Stats
       OID_SYS_INTERFACE_STAT                = "#{OID_SYS_INTERFACES}.4"
@@ -145,6 +152,9 @@ module NewRelic
 
           collisions = get_collisions
           collisions.each_key { |m| agent.report_counter_metric m, "collisions/sec", collisions[m] } unless collisions.nil?
+
+          status = get_status
+          status.each_key { |m| agent.report_metric m, status[m][:label], status[m][:count] } unless status.nil?
         end
       end
 
@@ -328,6 +338,41 @@ module NewRelic
         res = gather_snmp_metrics_by_name("Interfaces/Collisions", @names, OID_SYS_INTERFACE_STAT_COLLISIONS, snmp)
         NewRelic::PlatformLogger.debug("Interfaces: Got #{res.size}/#{@names.size} Collision metrics")
         return res
+      end
+
+
+
+      #
+      # Gather Interface Status
+      #
+      def get_status(snmp = nil)
+        snmp = snmp_manager unless snmp
+        metrics = { }
+        counter = 0
+
+        if snmp
+          # Init all the states with zeros so we always get them
+          base_name = "Interfaces/Status"
+          INTERFACE_STATUS_STATES.each do |key,value|
+            metrics["#{base_name}/#{value}"] = { :label => "interfaces", :count => 0 }
+          end
+
+          # ltmNodeAddrMonitorStatus
+          begin
+            snmp.walk([OID_SYS_INTERFACE_STATUS]) do |row|
+              row.each do |vb|
+                metric_name = "#{base_name}/#{INTERFACE_STATUS_STATES[vb.value.to_i]}"
+                metrics[metric_name][:count]  += 1
+                counter += 1
+              end
+            end
+          rescue Exception => e
+            NewRelic::PlatformLogger.error("Unable to gather Interface status metrics with error: #{e}")
+          end
+        end
+
+        NewRelic::PlatformLogger.debug("Interfaces: Got #{counter} Status metrics")
+        return metrics
       end
 
     end
