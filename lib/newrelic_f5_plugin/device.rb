@@ -13,16 +13,6 @@ module NewRelic
       OID_SYS_CLIENTSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.9.2.0"
       OID_SYS_CLIENTSSL_STAT_TOT_COMPAT_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.9.9.0"
       OID_SYS_CLIENTSSL_STAT_TOT_NATIVE_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.9.6.0"
-      OID_SYS_GLOBAL_HOST                                    = "1.3.6.1.4.1.3375.2.1.1.2.20"
-      OID_SYS_GLOBAL_HOST_CPU_COUNT                          = "#{OID_SYS_GLOBAL_HOST}.4.0"
-      OID_SYS_GLOBAL_HOST_CPU_IDLE_1M                        = "#{OID_SYS_GLOBAL_HOST}.25.0"
-      OID_SYS_GLOBAL_HOST_CPU_IOWAIT_1M                      = "#{OID_SYS_GLOBAL_HOST}.28.0"
-      OID_SYS_GLOBAL_HOST_CPU_IRQ_1M                         = "#{OID_SYS_GLOBAL_HOST}.26.0"
-      OID_SYS_GLOBAL_HOST_CPU_NICE_1M                        = "#{OID_SYS_GLOBAL_HOST}.23.0"
-      OID_SYS_GLOBAL_HOST_CPU_SOFTIRQ_1M                     = "#{OID_SYS_GLOBAL_HOST}.27.0"
-      OID_SYS_GLOBAL_HOST_CPU_SYSTEM_1M                      = "#{OID_SYS_GLOBAL_HOST}.24.0"
-      OID_SYS_GLOBAL_HOST_CPU_USER_1M                        = "#{OID_SYS_GLOBAL_HOST}.22.0"
-      OID_SYS_HOST_MEMORY_USED                               = "1.3.6.1.4.1.3375.2.1.7.1.2.0"
       OID_SYS_HTTP_COMPRESSION_STAT                          = "1.3.6.1.4.1.3375.2.1.1.2.22"
       OID_SYS_HTTP_COMPRESSION_STAT_AUDIO_POSTCOMPRESS_BYTES = "#{OID_SYS_HTTP_COMPRESSION_STAT}.24.0"
       OID_SYS_HTTP_COMPRESSION_STAT_AUDIO_PRECOMPRESS_BYTES  = "#{OID_SYS_HTTP_COMPRESSION_STAT}.23.0"
@@ -66,11 +56,6 @@ module NewRelic
       OID_SYS_HTTP_STAT_V11_RESP                             = "#{OID_SYS_HTTP_STAT}.15.0"
       OID_SYS_HTTP_STAT_V9_REQS                              = "#{OID_SYS_HTTP_STAT}.10.0"
       OID_SYS_HTTP_STAT_V9_RESP                              = "#{OID_SYS_HTTP_STAT}.13.0"
-      OID_SYS_PRODUCT                                        = "1.3.6.1.4.1.3375.2.1.4"
-      OID_SYS_PRODUCT_NAME                                   = "#{OID_SYS_PRODUCT}.1.0"
-      OID_SYS_PRODUCT_VERSION                                = "#{OID_SYS_PRODUCT}.2.0"
-      OID_SYS_PRODUCT_BUILD                                  = "#{OID_SYS_PRODUCT}.3.0"
-      OID_SYS_PRODUCT_EDITION                                = "#{OID_SYS_PRODUCT}.4.0"
       OID_SYS_SERVERSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.10.2.0"
       OID_SYS_SERVERSSL_STAT_TOT_COMPAT_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.9.0"
       OID_SYS_SERVERSSL_STAT_TOT_NATIVE_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.6.0"
@@ -126,12 +111,6 @@ module NewRelic
       def poll(agent, snmp)
         @snmp_manager = snmp
 
-        system_version = get_version
-        NewRelic::PlatformLogger.debug("Found F5 device with version: #{system_version}")
-
-        system_cpu = get_cpu
-        system_cpu.each_key { |m| agent.report_metric m, "%", system_cpu[m] } unless system_cpu.nil?
-
         system_memory = get_memory
         system_memory.each_key { |m| agent.report_metric m, "bytes", system_memory[m] } unless system_memory.nil?
 
@@ -175,59 +154,6 @@ module NewRelic
 
 
       #
-      # Gather Version information
-      #
-      def get_version(snmp = nil)
-        version = "Unknown!"
-        snmp    = snmp_manager unless snmp
-
-        if snmp
-          res = gather_snmp_metrics_array([OID_SYS_PRODUCT_VERSION, OID_SYS_PRODUCT_BUILD], snmp)
-
-          version = "#{res[0]}.#{res[1]}" unless res.empty?
-        end
-
-        return version
-      end
-
-
-      #
-      # Gather CPU Related metrics and report them in %
-      #
-      def get_cpu(snmp = nil)
-        metrics = { }
-        snmp    = snmp_manager unless snmp
-
-        if snmp
-          res = gather_snmp_metrics_array([OID_SYS_GLOBAL_HOST_CPU_COUNT, OID_SYS_GLOBAL_HOST_CPU_USER_1M, OID_SYS_GLOBAL_HOST_CPU_NICE_1M,
-                                           OID_SYS_GLOBAL_HOST_CPU_SYSTEM_1M, OID_SYS_GLOBAL_HOST_CPU_IRQ_1M, OID_SYS_GLOBAL_HOST_CPU_SOFTIRQ_1M,
-                                           OID_SYS_GLOBAL_HOST_CPU_IOWAIT_1M],
-                                           snmp)
-
-          # Bail out if we didn't get anything
-          return metrics if res.empty?
-
-          # In order to show the CPU usage as a total percentage, we divide by the number of cpus
-          cpu_count = res[0].to_i
-          vals = res[1..6].map { |i| i.to_f / cpu_count }
-
-          metrics["CPU/Global/User"]     = vals[0]
-          metrics["CPU/Global/Nice"]     = vals[1]
-          metrics["CPU/Global/System"]   = vals[2]
-          metrics["CPU/Global/IRQ"]      = vals[3]
-          metrics["CPU/Global/Soft IRQ"] = vals[4]
-          metrics["CPU/Global/IO Wait"]  = vals[5]
-
-          # Add it all up, and send a summary metric
-          metrics["CPU/Total/Global"] = vals.inject(0.0){ |a,b| a + b }
-
-        end
-
-        return metrics
-      end
-
-
-      #
       # Gather Memory related metrics and report them in bytes
       #
       def get_memory(snmp = nil)
@@ -235,13 +161,12 @@ module NewRelic
         snmp    = snmp_manager unless snmp
 
         if snmp
-          res = gather_snmp_metrics_array([OID_SYS_STAT_MEMORY_USED, OID_SYS_HOST_MEMORY_USED], snmp)
+          res = gather_snmp_metrics_array([OID_SYS_STAT_MEMORY_USED], snmp)
 
           # Bail out if we didn't get anything
           return metrics if res.empty?
 
           metrics["Memory/TMM"]  = res[0]
-          metrics["Memory/Host"] = res[1]
         end
 
         return metrics

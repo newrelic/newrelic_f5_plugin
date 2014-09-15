@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.16'
+  VERSION = '1.0.17'
 
   # Register and run the agent
   def self.run
@@ -71,6 +71,11 @@ module NewRelic::F5Plugin
         return
       end
 
+
+      # Platform metrics
+      NewRelic::PlatformLogger.debug("Collecting Platform stats")
+      @platform ||= NewRelic::F5Plugin::Platform.new
+      @platform.poll(self, snmp)
 
       # Device wide metrics
       NewRelic::PlatformLogger.debug("Collecting System stats")
