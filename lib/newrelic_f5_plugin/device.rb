@@ -10,9 +10,6 @@ module NewRelic
       attr_accessor :snmp_manager
 
       # Create the OIDs if they do not exist
-      OID_SYS_CLIENTSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.9.2.0"
-      OID_SYS_CLIENTSSL_STAT_TOT_COMPAT_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.9.9.0"
-      OID_SYS_CLIENTSSL_STAT_TOT_NATIVE_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.9.6.0"
       OID_SYS_HTTP_COMPRESSION_STAT                          = "1.3.6.1.4.1.3375.2.1.1.2.22"
       OID_SYS_HTTP_COMPRESSION_STAT_AUDIO_POSTCOMPRESS_BYTES = "#{OID_SYS_HTTP_COMPRESSION_STAT}.24.0"
       OID_SYS_HTTP_COMPRESSION_STAT_AUDIO_PRECOMPRESS_BYTES  = "#{OID_SYS_HTTP_COMPRESSION_STAT}.23.0"
@@ -56,9 +53,6 @@ module NewRelic
       OID_SYS_HTTP_STAT_V11_RESP                             = "#{OID_SYS_HTTP_STAT}.15.0"
       OID_SYS_HTTP_STAT_V9_REQS                              = "#{OID_SYS_HTTP_STAT}.10.0"
       OID_SYS_HTTP_STAT_V9_RESP                              = "#{OID_SYS_HTTP_STAT}.13.0"
-      OID_SYS_SERVERSSL_STAT_CUR_CONNS                       = "1.3.6.1.4.1.3375.2.1.1.2.10.2.0"
-      OID_SYS_SERVERSSL_STAT_TOT_COMPAT_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.9.0"
-      OID_SYS_SERVERSSL_STAT_TOT_NATIVE_CONNS                = "1.3.6.1.4.1.3375.2.1.1.2.10.6.0"
       OID_SYS_STAT                                           = "1.3.6.1.4.1.3375.2.1.1.2.1"
       OID_SYS_STAT_CLIENT_BYTES_IN                           = "#{OID_SYS_STAT}.3.0"
       OID_SYS_STAT_CLIENT_BYTES_OUT                          = "#{OID_SYS_STAT}.5.0"
@@ -132,9 +126,6 @@ module NewRelic
         system_http_compression = get_http_compression
         system_http_compression.each_key { |m| agent.report_counter_metric m, "bits/sec", system_http_compression[m] } unless system_http_compression.nil?
 
-        system_ssl = get_ssl
-        system_ssl.each_key { |m| agent.report_counter_metric m, "trans/sec", system_ssl[m] } unless system_ssl.nil?
-
         system_tcp_conns = get_tcp_connections
         system_tcp_conns.each_key { |m| agent.report_metric m, "conn", system_tcp_conns[m] } unless system_tcp_conns.nil?
 
@@ -181,17 +172,13 @@ module NewRelic
         snmp    = snmp_manager unless snmp
 
         if snmp
-          res = gather_snmp_metrics_array([OID_SYS_STAT_CLIENT_CUR_CONNS, OID_SYS_STAT_SERVER_CUR_CONNS,
-                                           OID_SYS_CLIENTSSL_STAT_CUR_CONNS, OID_SYS_SERVERSSL_STAT_CUR_CONNS],
-                                         snmp)
+          res = gather_snmp_metrics_array([OID_SYS_STAT_CLIENT_CUR_CONNS, OID_SYS_STAT_SERVER_CUR_CONNS], snmp)
 
           # Bail out if we didn't get anything
           return metrics if res.empty?
 
           metrics["Connections/Current/Client"]     = res[0]
           metrics["Connections/Current/Server"]     = res[1]
-          metrics["Connections/Current/Client SSL"] = res[2]
-          metrics["Connections/Current/Server SSL"] = res[3]
         end
 
         return metrics
@@ -364,36 +351,6 @@ module NewRelic
         return metrics
       end
 
-
-
-      #
-      # SSL Stats in trans/sec
-      #
-      def get_ssl(snmp = nil)
-        metrics = { }
-        snmp    = snmp_manager unless snmp
-
-        if snmp
-          res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_TOT_NATIVE_CONNS, OID_SYS_CLIENTSSL_STAT_TOT_COMPAT_CONNS,
-                                           OID_SYS_SERVERSSL_STAT_TOT_NATIVE_CONNS, OID_SYS_SERVERSSL_STAT_TOT_COMPAT_CONNS],
-                                           snmp)
-
-          # Bail out if we didn't get anything
-          return metrics if res.empty?
-
-          vals = res.map { |i| i.to_i }
-
-          metrics["SSL/Global/Client/Native"] = vals[0]
-          metrics["SSL/Global/Client/Compat"] = vals[1]
-          metrics["SSL/Global/Server/Native"] = vals[2]
-          metrics["SSL/Global/Server/Compat"] = vals[3]
-          metrics["SSL/Global/Total/Client"]  = (vals[0] + vals[1])
-          metrics["SSL/Global/Total/Server"]  = (vals[2] + vals[3])
-          metrics["SSL/Global/Total/All"]     = vals.inject(0) { |t,i| t + i }
-        end
-
-        return metrics
-      end
 
 
       #

@@ -4,7 +4,7 @@ require 'newrelic_plugin'
 require 'snmp'
 
 module NewRelic::F5Plugin
-  VERSION = '1.0.17'
+  VERSION = '1.0.18'
 
   # Register and run the agent
   def self.run
@@ -116,6 +116,11 @@ module NewRelic::F5Plugin
       NewRelic::PlatformLogger.debug("Collecting Client SSL Profile stats")
       @clientssl ||= NewRelic::F5Plugin::ClientSsl.new
       @clientssl.poll(self, snmp)
+
+      # Collect Global SSL statistics
+      NewRelic::PlatformLogger.debug("Collecting Global SSL stats")
+      @globalssl ||= NewRelic::F5Plugin::GlobalSsl.new
+      @globalssl.poll(self, snmp)
 
       # Cleanup snmp connection
       snmp.close

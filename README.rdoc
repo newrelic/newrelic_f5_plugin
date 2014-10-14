@@ -10,7 +10,6 @@ Device wide Metrics
 * Throughput (Total, Client side, Server side)
 * HTTP Requests (Requests/second, HTTP Methods, Status Codes, Versions)
 * HTTP Compression (Pre/Post broken down by content type)
-* SSL Requests/second
 * TCP Details (Current connections, connection rate, Server/Client side, Wait State)
 * Node status
 
@@ -41,6 +40,11 @@ iRule Statistics
 * Aborts per Second
 * Average cycles (requires timing enabled on the iRule)
 
+Global SSL Statistics
+* Requests/second
+* Transactions per Protocol
+* Transactions per Digest
+* Transactions per Key Exchanges
 
 == Requirements
 

@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'newrelic_f5_plugin/util'
 require 'newrelic_f5_plugin/client_ssl'
+require 'newrelic_f5_plugin/global_ssl'
 require 'newrelic_f5_plugin/device'
 require 'newrelic_f5_plugin/interfaces'
 require 'newrelic_f5_plugin/nodes'
