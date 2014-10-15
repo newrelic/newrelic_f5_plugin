@@ -1,3 +1,13 @@
+* 1.0.18
+  - Added global SSL statistics
+    - Requests/second
+    - Transactions per Protocol (SSLv3, TLSv1, TLSv2)
+    - Transactions per Digest
+    - Transactions per Key Exchange
+
+* 1.0.17
+  - Adapt to CPU reporting changes in 11.4.1
+
 * 1.0.16
   - Added Interface statistics
     - State
