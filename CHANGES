@@ -1,3 +1,6 @@
+* 1.0.19
+  - Adapt to CPU reporting changes in versions after 11.4.1
+
 * 1.0.18
   - Added global SSL statistics
     - Requests/second

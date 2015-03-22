@@ -119,11 +119,11 @@ module NewRelic
 
           # In order to show the CPU usage as a total percentage, we divide by the number of cpus for older versions
           case @version
-          when /^11\.4\.1/
+          when /^11\.[0-4]\.0/
+            cpu_count = res[0].to_i
+          else
             # 11.4.1 HF3 reports average CPU not total, so don't divide by CPU count
             cpu_count = 1
-          else
-            cpu_count = res[0].to_i
           end
 
           vals = res[1..6].map { |i| i.to_f / cpu_count }
