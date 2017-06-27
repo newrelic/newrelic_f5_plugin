@@ -69,6 +69,15 @@ module NewRelic
       OID_SYS_SERVERSSL_STAT_SHA_DIGEST        = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.49.0"
       OID_SYS_SERVERSSL_STAT_NOTSSL            = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.50.0"
 
+      # Client-side TLS
+      OID_SYS_CLIENTSSL_STAT_TLSV11            = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.60.0"
+      OID_SYS_CLIENTSSL_STAT_TLSV12            = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.61.0"
+      OID_SYS_CLIENTSSL_STAT_DTLSV1            = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.62.0"
+      # Server-side TLS
+      OID_SYS_SERVERSSL_STAT_TLSV11            = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.57.0"
+      OID_SYS_SERVERSSL_STAT_TLSV12            = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.58.0"
+      OID_SYS_SERVERSSL_STAT_DTLSV1            = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.59.0"
+
 
 
       #
@@ -176,8 +185,10 @@ module NewRelic
 
         if snmp
 
-          res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_SSLV2, OID_SYS_CLIENTSSL_STAT_SSLV3, OID_SYS_CLIENTSSL_STAT_TLSV1,
-                                           OID_SYS_SERVERSSL_STAT_SSLV2, OID_SYS_SERVERSSL_STAT_SSLV3, OID_SYS_SERVERSSL_STAT_TLSV1],
+          res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_SSLV2,  OID_SYS_CLIENTSSL_STAT_SSLV3,  OID_SYS_CLIENTSSL_STAT_TLSV1,
+                                           OID_SYS_SERVERSSL_STAT_SSLV2,  OID_SYS_SERVERSSL_STAT_SSLV3,  OID_SYS_SERVERSSL_STAT_TLSV1,
+                                           OID_SYS_CLIENTSSL_STAT_TLSV11, OID_SYS_CLIENTSSL_STAT_TLSV12, OID_SYS_SERVERSSL_STAT_TLSV11,
+                                           OID_SYS_SERVERSSL_STAT_TLSV12],
                                            snmp)
 
           # Bail out if we didn't get anything
@@ -185,12 +196,16 @@ module NewRelic
 
           vals = res.map { |i| i.to_i }
 
-          metrics["SSL/Global/Protocol/Client/SSLv2"] = vals[0]
-          metrics["SSL/Global/Protocol/Client/SSLv3"] = vals[1]
-          metrics["SSL/Global/Protocol/Client/TLSv1"] = vals[2]
-          metrics["SSL/Global/Protocol/Server/SSLv2"] = vals[3]
-          metrics["SSL/Global/Protocol/Server/SSLv3"] = vals[4]
-          metrics["SSL/Global/Protocol/Server/TLSv1"] = vals[5]
+          metrics["SSL/Global/Protocol/Client/SSLv2"]   = vals[0]
+          metrics["SSL/Global/Protocol/Client/SSLv3"]   = vals[1]
+          metrics["SSL/Global/Protocol/Client/TLSv1"]   = vals[2]
+          metrics["SSL/Global/Protocol/Client/TLSv1.1"] = vals[6]
+          metrics["SSL/Global/Protocol/Client/TLSv1.2"] = vals[7]
+          metrics["SSL/Global/Protocol/Server/SSLv2"]   = vals[3]
+          metrics["SSL/Global/Protocol/Server/SSLv3"]   = vals[4]
+          metrics["SSL/Global/Protocol/Server/TLSv1"]   = vals[5]
+          metrics["SSL/Global/Protocol/Server/TLSv1.1"] = vals[8]
+          metrics["SSL/Global/Protocol/Server/TLSv1.2"] = vals[9]
         end
 
         return metrics
