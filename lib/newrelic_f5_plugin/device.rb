@@ -84,6 +84,9 @@ module NewRelic
       OID_SYS_TCP_STAT_RXBADCOOKIE                           = "#{OID_SYS_TCP_STAT}.17.0"  # "The number of bad SYN-cookies."
       OID_SYS_TCP_STAT_SYNCACHEOVER                          = "#{OID_SYS_TCP_STAT}.18.0"  # "The number of SYN-cache overflow."
       OID_SYS_TCP_STAT_TXREXMITS                             = "#{OID_SYS_TCP_STAT}.19.0"  # "The number of retransmitted segments."
+      OID_SYS_GLOBAL_STAT                                    = "1.3.6.1.4.1.3375.2.1.1.2"
+      OID_SYS_STAT_HARD_SYNCOOKIE_GEN                        = "#{OID_SYS_GLOBAL_STAT}.57.0"  # "The number of hardware SYN cookies are generated on the system."
+      OID_SYS_STAT_HARD_SYNCOOKIE_DET                        = "#{OID_SYS_GLOBAL_STAT}.58.0"  # "The number of hardware SYN cookies are detected on the system."
 
 
       #
@@ -432,15 +435,17 @@ module NewRelic
 
         if snmp
           res = gather_snmp_metrics_array([OID_SYS_TCP_STAT_RXCOOKIE, OID_SYS_TCP_STAT_RXBADCOOKIE,
-                                           OID_SYS_TCP_STAT_SYNCACHEOVER],
+                                           OID_SYS_TCP_STAT_SYNCACHEOVER, OID_SYS_STAT_HARD_SYNCOOKIE_GEN, OID_SYS_STAT_HARD_SYNCOOKIE_DET],
                                          snmp)
 
           # Bail out if we didn't get anything
           return metrics if res.empty?
 
-          metrics["TCP/SYN/Received SYN-Cookies"] = res[0]
-          metrics["TCP/SYN/Bad SYN-Cookies"]      = res[1]
-          metrics["TCP/SYN/SYN-cache Overflows"]  = res[2]
+          metrics["TCP/SYN/Received SYN-Cookies"]           = res[0]
+          metrics["TCP/SYN/Bad SYN-Cookies"]                = res[1]
+          metrics["TCP/SYN/SYN-cache Overflows"]            = res[2]
+          metrics["TCP/SYN/Hardware SYN-Cookies Generated"] = res[3]
+          metrics["TCP/SYN/Hardware SYN-Cookies Detected"]  = res[4]
         end
 
         return metrics
