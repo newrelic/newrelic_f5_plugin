@@ -37,11 +37,13 @@ module NewRelic
       OID_SYS_CLIENTSSL_STAT_DHRSA_KEYXCHG     = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.37.0"
       OID_SYS_CLIENTSSL_STAT_RSA_KEYXCHG       = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.40.0"
       OID_SYS_CLIENTSSL_STAT_EDHRSA_KEYXCHG    = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.51.0"
+      OID_SYS_CLIENTSSL_STAT_ECDHERSA_KEYXCHG  = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.63.0"
       # Server-side Key Exchanges
       OID_SYS_SERVERSSL_STAT_ADH_KEYXCHG       = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.35.0"
       OID_SYS_SERVERSSL_STAT_DHRSA_KEYXCHG     = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.37.0"
       OID_SYS_SERVERSSL_STAT_RSA_KEYXCHG       = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.40.0"
       OID_SYS_SERVERSSL_STAT_EDHRSA_KEYXCHG    = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.51.0"
+      OID_SYS_SERVERSSL_STAT_ECDHERSA_KEYXCHG  = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.60.0"
 
       # Client-side Bulk
       OID_SYS_CLIENTSSL_STAT_NULL_BULK         = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.41.0"
@@ -50,6 +52,7 @@ module NewRelic
       OID_SYS_CLIENTSSL_STAT_IDEA_BULK         = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.44.0"
       OID_SYS_CLIENTSSL_STAT_RC2_BULK          = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.45.0"
       OID_SYS_CLIENTSSL_STAT_RC4_BULK          = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.46.0"
+      OID_SYS_CLIENTSSL_STAT_AESGCM_BULK       = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.70.0"
       # Server-side Bulk
       OID_SYS_SERVERSSL_STAT_NULL_BULK         = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.41.0"
       OID_SYS_SERVERSSL_STAT_AES_BULK          = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.42.0"
@@ -57,6 +60,7 @@ module NewRelic
       OID_SYS_SERVERSSL_STAT_IDEA_BULK         = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.44.0"
       OID_SYS_SERVERSSL_STAT_RC2_BULK          = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.45.0"
       OID_SYS_SERVERSSL_STAT_RC4_BULK          = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.46.0"
+      OID_SYS_SERVERSSL_STAT_AESGCM_BULK       = "#{OID_SYS_GLOBAL_SERVER_SSL_STAT}.66.0"
 
       # Client-side Digests
       OID_SYS_CLIENTSSL_STAT_NULL_DIGEST       = "#{OID_SYS_GLOBAL_CLIENT_SSL_STAT}.47.0"
@@ -222,8 +226,8 @@ module NewRelic
 
         if snmp
 
-          res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_ADH_KEYXCHG, OID_SYS_CLIENTSSL_STAT_DHRSA_KEYXCHG, OID_SYS_CLIENTSSL_STAT_RSA_KEYXCHG, OID_SYS_CLIENTSSL_STAT_EDHRSA_KEYXCHG,
-                                           OID_SYS_SERVERSSL_STAT_ADH_KEYXCHG, OID_SYS_SERVERSSL_STAT_DHRSA_KEYXCHG, OID_SYS_SERVERSSL_STAT_RSA_KEYXCHG, OID_SYS_SERVERSSL_STAT_EDHRSA_KEYXCHG],
+          res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_ADH_KEYXCHG, OID_SYS_CLIENTSSL_STAT_DHRSA_KEYXCHG, OID_SYS_CLIENTSSL_STAT_RSA_KEYXCHG, OID_SYS_CLIENTSSL_STAT_EDHRSA_KEYXCHG, OID_SYS_CLIENTSSL_STAT_ECDHERSA_KEYXCHG,
+                                           OID_SYS_SERVERSSL_STAT_ADH_KEYXCHG, OID_SYS_SERVERSSL_STAT_DHRSA_KEYXCHG, OID_SYS_SERVERSSL_STAT_RSA_KEYXCHG, OID_SYS_SERVERSSL_STAT_EDHRSA_KEYXCHG, OID_SYS_SERVERSSL_STAT_ECDHERSA_KEYXCHG],
                                            snmp)
 
           # Bail out if we didn't get anything
@@ -231,14 +235,16 @@ module NewRelic
 
           vals = res.map { |i| i.to_i }
 
-          metrics["SSL/Global/KeyExchange/Client/Adh"]    = vals[0]
-          metrics["SSL/Global/KeyExchange/Client/DhRSA"]  = vals[1]
-          metrics["SSL/Global/KeyExchange/Client/RSA"]    = vals[2]
-          metrics["SSL/Global/KeyExchange/Client/EdhRsa"] = vals[3]
-          metrics["SSL/Global/KeyExchange/Server/Adh"]    = vals[4]
-          metrics["SSL/Global/KeyExchange/Server/DhRSA"]  = vals[5]
-          metrics["SSL/Global/KeyExchange/Server/RSA"]    = vals[6]
-          metrics["SSL/Global/KeyExchange/Server/EdhRsa"] = vals[7]
+          metrics["SSL/Global/KeyExchange/Client/Adh"]      = vals[0]
+          metrics["SSL/Global/KeyExchange/Client/DhRSA"]    = vals[1]
+          metrics["SSL/Global/KeyExchange/Client/RSA"]      = vals[2]
+          metrics["SSL/Global/KeyExchange/Client/EdhRsa"]   = vals[3]
+          metrics["SSL/Global/KeyExchange/Client/EcdheRsa"] = vals[4]
+          metrics["SSL/Global/KeyExchange/Server/Adh"]      = vals[5]
+          metrics["SSL/Global/KeyExchange/Server/DhRSA"]    = vals[6]
+          metrics["SSL/Global/KeyExchange/Server/RSA"]      = vals[7]
+          metrics["SSL/Global/KeyExchange/Server/EdhRsa"]   = vals[8]
+          metrics["SSL/Global/KeyExchange/Server/EcdheRsa"] = vals[9]
         end
 
         return metrics
@@ -256,8 +262,9 @@ module NewRelic
         if snmp
 
           res = gather_snmp_metrics_array([OID_SYS_CLIENTSSL_STAT_NULL_BULK, OID_SYS_CLIENTSSL_STAT_AES_BULK, OID_SYS_CLIENTSSL_STAT_DES_BULK, OID_SYS_CLIENTSSL_STAT_IDEA_BULK,
-                                           OID_SYS_CLIENTSSL_STAT_RC2_BULK, OID_SYS_CLIENTSSL_STAT_RC4_BULK, OID_SYS_SERVERSSL_STAT_NULL_BULK, OID_SYS_SERVERSSL_STAT_AES_BULK,
-                                           OID_SYS_SERVERSSL_STAT_DES_BULK, OID_SYS_SERVERSSL_STAT_IDEA_BULK, OID_SYS_SERVERSSL_STAT_RC2_BULK, OID_SYS_SERVERSSL_STAT_RC4_BULK],
+                                           OID_SYS_CLIENTSSL_STAT_RC2_BULK, OID_SYS_CLIENTSSL_STAT_RC4_BULK, OID_SYS_CLIENTSSL_STAT_AESGCM_BULK, OID_SYS_SERVERSSL_STAT_NULL_BULK,
+                                           OID_SYS_SERVERSSL_STAT_AES_BULK, OID_SYS_SERVERSSL_STAT_DES_BULK, OID_SYS_SERVERSSL_STAT_IDEA_BULK, OID_SYS_SERVERSSL_STAT_RC2_BULK,
+                                           OID_SYS_SERVERSSL_STAT_RC4_BULK, OID_SYS_SERVERSSL_STAT_AESGCM_BULK],
                                            snmp)
 
           # Bail out if we didn't get anything
@@ -265,19 +272,21 @@ module NewRelic
 
           vals = res.map { |i| i.to_i }
 
-          metrics["SSL/Global/Bulk/Client/Null"] = vals[0]
-          metrics["SSL/Global/Bulk/Client/AES"]  = vals[1]
-          metrics["SSL/Global/Bulk/Client/DES"]  = vals[2]
-          metrics["SSL/Global/Bulk/Client/IDEA"] = vals[3]
-          metrics["SSL/Global/Bulk/Client/RC2"]  = vals[4]
-          metrics["SSL/Global/Bulk/Client/RC4"]  = vals[5]
+          metrics["SSL/Global/Bulk/Client/Null"]   = vals[0]
+          metrics["SSL/Global/Bulk/Client/AES"]    = vals[1]
+          metrics["SSL/Global/Bulk/Client/DES"]    = vals[2]
+          metrics["SSL/Global/Bulk/Client/IDEA"]   = vals[3]
+          metrics["SSL/Global/Bulk/Client/RC2"]    = vals[4]
+          metrics["SSL/Global/Bulk/Client/RC4"]    = vals[5]
+          metrics["SSL/Global/Bulk/Client/AESGCM"] = vals[6]
 
-          metrics["SSL/Global/Bulk/Server/Null"] = vals[6]
-          metrics["SSL/Global/Bulk/Server/AES"]  = vals[7]
-          metrics["SSL/Global/Bulk/Server/DES"]  = vals[8]
-          metrics["SSL/Global/Bulk/Server/IDEA"] = vals[9]
-          metrics["SSL/Global/Bulk/Server/RC2"]  = vals[10]
-          metrics["SSL/Global/Bulk/Server/RC4"]  = vals[11]
+          metrics["SSL/Global/Bulk/Server/Null"]   = vals[7]
+          metrics["SSL/Global/Bulk/Server/AES"]    = vals[8]
+          metrics["SSL/Global/Bulk/Server/DES"]    = vals[9]
+          metrics["SSL/Global/Bulk/Server/IDEA"]   = vals[10]
+          metrics["SSL/Global/Bulk/Server/RC2"]    = vals[11]
+          metrics["SSL/Global/Bulk/Server/RC4"]    = vals[12]
+          metrics["SSL/Global/Bulk/Server/AESGCM"] = vals[13]
         end
 
         return metrics
