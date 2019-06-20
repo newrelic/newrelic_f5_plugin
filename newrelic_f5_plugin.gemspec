@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'newrelic_f5_plugin'
   s.version           = '1.0.22'
-  s.date              = '2019-06-18'
+  s.date              = '2019-06-20'
   s.rubyforge_project = 'newrelic_f5_plugin'
   s.licenses          = ['MIT']
 
