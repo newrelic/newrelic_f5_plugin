@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
   s.name              = 'newrelic_f5_plugin'
   s.version           = '1.0.22'
   s.date              = '2019-06-20'
-  s.rubyforge_project = 'newrelic_f5_plugin'
   s.licenses          = ['MIT']
 
   ## Make sure your summary is short. The description may be as long
